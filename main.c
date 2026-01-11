@@ -82,7 +82,7 @@ TermPos translate_buff_pos_relative(BufferCtx buffer){
 
 
 int build_buffer(BufferCtx* buffer,FILE* file,int term_height){
-    buffer->mem_len = 1000000;
+    buffer->mem_len = 100;
     buffer->mem = (char *)malloc(sizeof(char) * buffer->mem_len);
     buffer->buff_pos = 0;
     
@@ -105,6 +105,11 @@ int build_buffer(BufferCtx* buffer,FILE* file,int term_height){
             slice_start = i+1;
         }
         i++;
+        if(i > buffer->mem_len){
+            buffer->mem_len *= 10;
+            char * new_mem_block = (char *)realloc(buffer->mem,buffer->mem_len);
+            buffer->mem = new_mem_block;
+        }
     }
     
     buffer->view.start = 0;
