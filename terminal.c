@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <termios.h>
 
+#include "types.h"
+
 static struct termios orig_termios;
 static int term_rows, term_cols;
 
@@ -34,6 +36,27 @@ void reset_cursor(){
 }
 
 void terminal_setup(){
+    get_term_size(&term_rows,&term_cols);
     clear_screen();
     enable_raw_mode();
+}
+
+void draw_buffer(BufferCtx buffer){
+    char out[10000] = {0};
+    int i2 = 0;
+    for(int i = buffer.view.start; i <= buffer.view.end;i++){
+        for(int j = buffer.slices[i].start;j <= buffer.slices[i].end;j++){
+            out[i2]= buffer.mem[j];
+            i2++;
+        }
+    }
+    out[i2] = '\0';
+
+    while(i2 > 0 && (out[i2-1] == '\n' || out[i2-1] == '\r')){
+        i2--;
+        out[i2] = '\0';
+    }
+    
+    printf("\x1b[2J\x1b[H%s",out);
+    fflush(stdout);      
 }
