@@ -30,7 +30,6 @@ void move_buff_pos_up(BufferCtx* buffer,int step){
     buffer->buff_pos = buffer->slices[slice-1].start + x_offset;
     if(slice <= buffer->view.start){
         buffer->view.start -= 1;
-        buffer->view.end -= 1;
     }
 }
 
@@ -48,7 +47,6 @@ void move_buff_pos_down(BufferCtx* buffer,int step){
     buffer->buff_pos = buffer->slices[slice+1].start + x_offset;
     if(slice >= buffer->view.end){
         buffer->view.start += 1;
-        buffer->view.end += 1;
     }
 }
 
@@ -64,6 +62,21 @@ void move_buff_pos_right(BufferCtx* buffer, int step){
     buffer->buff_pos = (new_pos > buffer->slices[slice].end) ? buffer->slices[slice].end : new_pos;
 }
 
+void update_view_end(BufferCtx* buffer,TermCtx terminal){
+    int lines_loaded = 0;
+    int i = buffer->view.start;
+    while(lines_loaded < terminal.rows && i < buffer->slices_len){
+        int slice_lines = (buffer->slices[i].len+terminal.cols) / terminal.cols;
+        if(lines_loaded + slice_lines  > terminal.rows){
+            break;
+        }
+        
+        lines_loaded += slice_lines; 
+        i++;
+    }
+    buffer->view.end = i-1;
+}
+
 TermPos translate_buff_pos_absolute(BufferCtx buffer){
     int slice = locate_slice(buffer.buff_pos,buffer);
     return (TermPos){
@@ -72,16 +85,31 @@ TermPos translate_buff_pos_absolute(BufferCtx buffer){
     };
 };
 
-TermPos translate_buff_pos_relative(BufferCtx buffer){
-    int slice = locate_slice(buffer.buff_pos,buffer);
+TermPos translate_buff_pos_relative(BufferCtx buffer, TermCtx terminal){
+    int slice = locate_slice(buffer.buff_pos, buffer);
+    
+    int offset_in_line = buffer.buff_pos - buffer.slices[slice].start;
+    
+    int how_many_wrapped_rows = offset_in_line / terminal.cols;  
+    int column_in_wrapped_row = offset_in_line % terminal.cols;  
+    
+    int screen_row_for_line_start = 0;
+    
+    for (int i = buffer.view.start; i < slice; i++) {
+        int chars_in_line = buffer.slices[i].len;
+        int rows_needed = (chars_in_line + terminal.cols ) / terminal.cols;
+        screen_row_for_line_start += rows_needed;
+    }
+    
+    int final_screen_row = screen_row_for_line_start + how_many_wrapped_rows;
+    
     return (TermPos){
-        .x = buffer.buff_pos - buffer.slices[slice].start+1,
-        .y = slice - buffer.view.start + 1
+        .x = column_in_wrapped_row + 1,  
+        .y = final_screen_row + 1        
     };
 }
 
-
-int build_buffer(BufferCtx* buffer,FILE* file,int term_height){
+int build_buffer(BufferCtx* buffer,FILE* file){
     buffer->mem_len = 100;
     buffer->mem = (char *)malloc(sizeof(char) * buffer->mem_len);
     buffer->buff_pos = 0;
@@ -111,10 +139,7 @@ int build_buffer(BufferCtx* buffer,FILE* file,int term_height){
             buffer->mem = new_mem_block;
         }
     }
-    
     buffer->view.start = 0;
-    int limit = (term_height > buffer->slices_len) ? buffer->slices_len-1 : term_height-1;
-    buffer->view.end = limit;
     return 1;
 }
 
@@ -124,7 +149,9 @@ int main(int argc, char **argv){
     FILE * file = fopen(argv[1],"r");
     BufferCtx buff;
     terminal_setup();
-    build_buffer(&buff, file,term_rows);
+    build_buffer(&buff, file);
+    update_view_end(&buff, terminal);
+    printf("%d %d",buff.view.start,buff.view.end);
     draw_buffer(buff);
     
     reset_cursor();
@@ -136,15 +163,16 @@ int main(int argc, char **argv){
             switch (c) {
                 case 'h':
                     move_buff_pos_left(&buff,1); 
-                    a = translate_buff_pos_relative(buff);    
+                    a = translate_buff_pos_relative(buff,terminal);
                     printf("\x1b[%d;%dH",a.y,a.x);
                     fflush(stdout);
                     break;
                 case 'j':
                     clear_screen();
                     move_buff_pos_down(&buff,1);
+                    update_view_end(&buff, terminal);
                     draw_buffer(buff);
-                    a = translate_buff_pos_relative(buff);
+                    a = translate_buff_pos_relative(buff,terminal);
                     b = translate_buff_pos_absolute(buff);
                     printf("\x1b[43;30H %d:%d",b.y,b.x);
                     printf("\x1b[%d;%dH",a.y,a.x);
@@ -153,8 +181,9 @@ int main(int argc, char **argv){
                 case 'k':
                     clear_screen();
                     move_buff_pos_up(&buff,1);
+                    update_view_end(&buff, terminal);
                     draw_buffer(buff);
-                    a = translate_buff_pos_relative(buff);
+                    a = translate_buff_pos_relative(buff,terminal);
                     b = translate_buff_pos_absolute(buff);
                     printf("\x1b[43;30H %d:%d",b.y,b.x);
                     printf("\x1b[%d;%dH",a.y,a.x);
@@ -162,7 +191,7 @@ int main(int argc, char **argv){
                     break;
                 case 'l':
                     move_buff_pos_right(&buff,1);
-                    a = translate_buff_pos_relative(buff);
+                    a = translate_buff_pos_relative(buff,terminal);
                     printf("\x1b[%d;%dH",a.y,a.x);
                     fflush(stdout);
                     break;

@@ -7,6 +7,11 @@ typedef struct {
     unsigned int x;
 }TermPos; 
 
+typedef struct {
+    int rows;
+    int cols;
+}TermCtx;
+
 typedef struct{
     int len;
     int start;

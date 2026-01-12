@@ -7,13 +7,13 @@
 #include "types.h"
 
 static struct termios orig_termios;
-static int term_rows, term_cols;
+static TermCtx terminal; 
 
-void get_term_size(int *rows, int *cols) {
+void get_term_size(TermCtx * terminal) {
     struct winsize ws;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-    *rows = ws.ws_row;
-    *cols = ws.ws_col;
+    terminal->cols = ws.ws_col;
+    terminal->rows = ws.ws_row;
 }
 
 void enable_raw_mode(void) {
@@ -36,7 +36,7 @@ void reset_cursor(){
 }
 
 void terminal_setup(){
-    get_term_size(&term_rows,&term_cols);
+    get_term_size(&terminal);
     clear_screen();
     enable_raw_mode();
 }
