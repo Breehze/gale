@@ -87,35 +87,31 @@ TermPos translate_buff_pos_absolute(BufferCtx buffer){
 
 TermPos translate_buff_pos_relative(BufferCtx buffer, TermCtx terminal){
     int slice = locate_slice(buffer.buff_pos, buffer);
-    
+   
     int offset_in_line = buffer.buff_pos - buffer.slices[slice].start;
-    
-    int how_many_wrapped_rows = offset_in_line / terminal.cols;  
-    int column_in_wrapped_row = offset_in_line % terminal.cols;  
-    
+
     int screen_row_for_line_start = 0;
     
     for (int i = buffer.view.start; i < slice; i++) {
-        int chars_in_line = buffer.slices[i].len;
-        int rows_needed = (chars_in_line + terminal.cols ) / terminal.cols;
+        int rows_needed = (buffer.slices[i].len + terminal.cols ) / terminal.cols;
         screen_row_for_line_start += rows_needed;
     }
     
-    int final_screen_row = screen_row_for_line_start + how_many_wrapped_rows;
+    int final_screen_row = screen_row_for_line_start + offset_in_line / terminal.cols;
     
     return (TermPos){
-        .x = column_in_wrapped_row + 1,  
+        .x = offset_in_line % terminal.cols + 1,  
         .y = final_screen_row + 1        
     };
 }
 
 int build_buffer(BufferCtx* buffer,FILE* file){
-    buffer->mem_len = 100;
-    buffer->mem = (char *)malloc(sizeof(char) * buffer->mem_len);
-    buffer->buff_pos = 0;
-    
-    buffer->slices_len = 0;
-    buffer->slices = (Slice *)malloc(sizeof(Slice) * 1000);
+    *buffer = (BufferCtx){
+        .mem_len = 100,
+        .mem = (char *)malloc(sizeof(char) * 100),
+        .slices_len = 0,
+        .slices = (Slice *)malloc(sizeof(Slice) * 1000)
+    };
 
     char c;
     
