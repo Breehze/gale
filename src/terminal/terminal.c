@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <termios.h>
 
-#include "types.h"
+#include "../includes/types.h"
+#include "terminal.h"
 
 static struct termios orig_termios;
 static TermCtx terminal; 
@@ -25,20 +26,21 @@ void enable_raw_mode(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
-void clear_screen(){
+void clear_screen(void){
     printf("\x1b[2J");
     fflush(stdout);
 }
 
-void reset_cursor(){
+void reset_cursor(void){
     printf("\x1b[H");
     fflush(stdout);
 }
 
-void terminal_setup(){
+TermCtx terminal_setup(void){
     get_term_size(&terminal);
     clear_screen();
     enable_raw_mode();
+    return terminal;
 }
 
 void draw_buffer(BufferCtx buffer){
