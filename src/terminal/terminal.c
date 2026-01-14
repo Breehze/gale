@@ -17,6 +17,7 @@ void get_term_size(TermCtx * terminal) {
     terminal->rows = ws.ws_row;
 }
 
+
 void enable_raw_mode(void) {
     tcgetattr(STDIN_FILENO, &orig_termios);
     struct termios raw = orig_termios;
@@ -26,15 +27,36 @@ void enable_raw_mode(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
+
 void clear_screen(void){
     printf("\x1b[2J");
     fflush(stdout);
 }
 
+
 void reset_cursor(void){
     printf("\x1b[H");
     fflush(stdout);
 }
+
+
+void move_cursor(TermPos location){
+    printf("\x1b[%d;%dH",location.y,location.x);
+    fflush(stdout);
+}
+
+
+void change_cursor_to_line(void){
+    printf("\x1b[6 q");
+    fflush(stdout);
+}
+
+
+void change_cursor_to_block(void){
+    printf("\x1b[0 q");
+    fflush(stdout);
+}
+
 
 TermCtx terminal_setup(void){
     get_term_size(&terminal);
@@ -42,6 +64,7 @@ TermCtx terminal_setup(void){
     enable_raw_mode();
     return terminal;
 }
+
 
 void draw_buffer(BufferCtx buffer){
     char out[10000] = {0};
