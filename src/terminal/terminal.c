@@ -5,6 +5,7 @@
 #include <termios.h>
 
 #include "../includes/types.h"
+#include "../bufferstuff/utils.h"
 #include "terminal.h"
 
 static struct termios orig_termios;
@@ -70,7 +71,8 @@ void draw_buffer(BufferCtx buffer){
     char out[10000] = {0};
     int i2 = 0;
     for(int i = buffer.view.start; i <= buffer.view.end;i++){
-        for(int j = buffer.slices[i].start;j <= buffer.slices[i].end;j++){
+        int slice_start = get_slice_start(i, buffer);
+        for(int j = slice_start;j < slice_start + buffer.slices[i].len;j++){
             out[i2]= buffer.mem[j];
             i2++;
         }

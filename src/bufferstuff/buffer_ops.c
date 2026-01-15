@@ -19,11 +19,7 @@ int build_buffer(BufferCtx* buffer,FILE* file){
     while ((c = fgetc(file)) != EOF) {
         buffer->mem[i] = c;
         if(c == '\n'){
-            buffer->slices[buffer->slices_len] = (Slice){
-                .start = slice_start,
-                .end = i,
-                .len = i - slice_start
-            };
+            buffer->slices[buffer->slices_len].len = i - slice_start + 1;
             buffer->slices_len++; 
             slice_start = i+1;
         }
@@ -45,12 +41,12 @@ void move_buff_pos_up(BufferCtx* buffer,int step){
         return;
     }
     
-    int x_offset = buffer->buff_pos - buffer->slices[slice].start;
+    int x_offset = buffer->buff_pos - get_slice_start(slice,*buffer);
     
-    if(x_offset > buffer->slices[slice-1].len){
-        x_offset = buffer->slices[slice-1].len;
+    if(x_offset > buffer->slices[slice-1].len-1){
+        x_offset = buffer->slices[slice-1].len-1;
     }
-    buffer->buff_pos = buffer->slices[slice-1].start + x_offset;
+    buffer->buff_pos = get_slice_start(slice-1,*buffer) + x_offset;
     if(slice <= buffer->view.start){
         buffer->view.start -= 1;
     }
@@ -63,12 +59,11 @@ void move_buff_pos_down(BufferCtx* buffer,int step){
         return;
     }
     
-    int x_offset = buffer->buff_pos - buffer->slices[slice].start;
-    
-    if(x_offset > buffer->slices[slice+1].len){
-        x_offset = buffer->slices[slice+1].len;
+    int x_offset = buffer->buff_pos - get_slice_start(slice,*buffer);
+    if(x_offset > buffer->slices[slice+1].len-1){
+        x_offset = buffer->slices[slice+1].len-1;
     }
-    buffer->buff_pos = buffer->slices[slice+1].start + x_offset;
+    buffer->buff_pos = get_slice_start(slice+1,*buffer) + x_offset;
     if(slice >= buffer->view.end){
         buffer->view.start += 1;
     }
@@ -78,14 +73,16 @@ void move_buff_pos_down(BufferCtx* buffer,int step){
 void move_buff_pos_left(BufferCtx* buffer,int step){
     int slice = locate_slice(buffer->buff_pos,*buffer);
     int new_pos = buffer->buff_pos - step;
-    buffer->buff_pos = (new_pos < buffer->slices[slice].start) ? buffer->slices[slice].start : new_pos;
+    int slice_start = get_slice_start(slice,*buffer);
+    buffer->buff_pos = (new_pos < slice_start) ? slice_start : new_pos;
 }
 
 
 void move_buff_pos_right(BufferCtx* buffer, int step){  
     int slice = locate_slice(buffer->buff_pos,*buffer);
     int new_pos = buffer->buff_pos + step;
-    buffer->buff_pos = (new_pos > buffer->slices[slice].end) ? buffer->slices[slice].end : new_pos;
+    int slice_end = get_slice_start(slice,*buffer) + buffer->slices[slice].len-1;
+    buffer->buff_pos = (new_pos > slice_end) ? slice_end : new_pos;
 }
 
 

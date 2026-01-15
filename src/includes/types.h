@@ -14,8 +14,6 @@ typedef struct {
 
 typedef struct{
     int len;
-    int start;
-    int end;
 }Slice;
 
 typedef struct{

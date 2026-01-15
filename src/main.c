@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "bufferstuff/utils.h"
 #include "includes/types.h"
 #include "terminal/terminal.h"
 #include "bufferstuff/buffer_ops.h"
@@ -76,7 +77,17 @@ int main(int argc, char **argv){
     TermCtx terminal = terminal_setup();
     build_buffer(&buff, file);
     update_view_end(&buff, terminal);
-    printf("%d %d",buff.view.start,buff.view.end);
+    /*buff.buff_pos = 11;
+    TermPos a = translate_buff_pos_relative(buff, terminal);
+    printf("%d %d\n",a.x,a.y);
+    for(int i = 0;i<buff.slices_len;i++){
+        printf("%d\n",buff.slices[i].len);
+    }
+    printf("\n");*/
+    //printf("%s",buff.mem);
+    //printf("%d %d\n",buff.view.start,buff.view.end);   
+    //printf("%d\n",locate_slice(8, buff));
+    //printf("%d",get_slice_start(1, buff));
     draw_buffer(buff);
     
     reset_cursor();
