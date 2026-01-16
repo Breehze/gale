@@ -8,7 +8,8 @@ int build_buffer(BufferCtx* buffer,FILE* file){
     *buffer = (BufferCtx){
         .mem_len = 100,
         .mem = (char *)malloc(sizeof(char) * 100),
-        .slices_len = 0,
+        .slices_mem_filled = 0,
+        .slices_mem_len = 1000,
         .slices = (Slice *)malloc(sizeof(Slice) * 1000)
     };
 
@@ -19,9 +20,13 @@ int build_buffer(BufferCtx* buffer,FILE* file){
     while ((c = fgetc(file)) != EOF) {
         buffer->mem[i] = c;
         if(c == '\n'){
-            buffer->slices[buffer->slices_len].len = i - slice_start + 1;
-            buffer->slices_len++; 
-            slice_start = i+1;
+            buffer->slices[buffer->slices_mem_filled].len = i - slice_start + 1;
+            buffer->slices_mem_filled++; 
+            slice_start = i+1;     
+            if(buffer->slices_mem_filled  > buffer->slices_mem_len){
+                buffer->slices_mem_len *= 10;
+                buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len);
+            }
         }
         i++;
         if(i > buffer->mem_len){
@@ -30,6 +35,7 @@ int build_buffer(BufferCtx* buffer,FILE* file){
             buffer->mem = new_mem_block;
         }
     }
+    buffer->mem_filled = i;
     buffer->view.start = 0;
     return 0;
 }
@@ -55,7 +61,7 @@ void move_buff_pos_up(BufferCtx* buffer,int step){
 
 void move_buff_pos_down(BufferCtx* buffer,int step){
     int slice = locate_slice(buffer->buff_pos,*buffer);
-    if(slice + step >= buffer->slices_len){
+    if(slice + step >= buffer->slices_mem_filled){
         return;
     }
     
@@ -89,7 +95,7 @@ void move_buff_pos_right(BufferCtx* buffer, int step){
 void update_view_end(BufferCtx* buffer,TermCtx terminal){
     int lines_loaded = 0;
     int i = buffer->view.start;
-    while(lines_loaded < terminal.rows && i < buffer->slices_len){
+    while(lines_loaded < terminal.rows && i < buffer->slices_mem_filled){
         int slice_lines = (buffer->slices[i].len+terminal.cols) / terminal.cols;
         if(lines_loaded + slice_lines  > terminal.rows){
             break;

@@ -23,9 +23,11 @@ typedef struct{
 
 typedef struct {
     char * mem;
+    size_t mem_filled;
     size_t mem_len;
     int buff_pos;
-    int slices_len;
+    size_t slices_mem_len;
+    size_t slices_mem_filled;
     Slice *slices;
     BufferView view;
 }BufferCtx;

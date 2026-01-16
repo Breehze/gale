@@ -3,13 +3,13 @@
 int locate_slice(int position, BufferCtx buffer){
     int accumulated = 0;
     
-    for(int i = 0; i < buffer.slices_len; i++){
+    for(int i = 0; i < buffer.slices_mem_filled; i++){
         if(position < accumulated + buffer.slices[i].len){
             return i;
         }
         accumulated += buffer.slices[i].len;
     }  
-    return buffer.slices_len - 1;
+        return buffer.slices_mem_filled - 1;
 }
 
 int get_slice_start(int slice_indx, BufferCtx buffer) {
