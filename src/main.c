@@ -66,6 +66,7 @@ void insert_into_buffer(char c,BufferCtx * buffer){
         buffer->mem_len *= 10;
         buffer->mem = (char*)realloc(buffer->mem,buffer->mem_len);
     }
+    
     size_t tail_len = buffer->mem_filled - buffer->buff_pos;
     memmove(&buffer->mem[buffer->buff_pos+1],&buffer->mem[buffer->buff_pos],tail_len);
     buffer->slices[locate_slice(buffer->buff_pos,*buffer)].len += 1;
@@ -74,7 +75,16 @@ void insert_into_buffer(char c,BufferCtx * buffer){
 }
 
 void insert_new_line(BufferCtx * buffer,TermCtx terminal){
-    //slice mem check
+    if(buffer->slices_mem_filled + 1 > buffer->slices_mem_len){
+        buffer->slices_mem_len *= 10;
+        buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len);
+    }
+
+    if(buffer->mem_filled + 1 > buffer->mem_len){
+        buffer->mem_len *= 10;
+        buffer->mem = (char*)realloc(buffer->mem,buffer->mem_len);
+    }
+    
     int curr_slice = locate_slice(buffer->buff_pos,*buffer);
     int slice_start = get_slice_start(curr_slice,*buffer);
     int pos_in_slice = buffer->buff_pos - slice_start;
