@@ -5,6 +5,7 @@
 
 int build_buffer(BufferCtx* buffer,FILE* file);
 
+// Buffer position modifications
 void update_view_end(BufferCtx* buffer,TermCtx terminal);
 
 void move_buff_pos_up(BufferCtx* buffer,int step);
@@ -15,6 +16,12 @@ void move_buff_pos_left(BufferCtx* buffer,int step);
 
 void move_buff_pos_right(BufferCtx* buffer, int step);
 
+// Buffer content modifications
+void insert_into_buffer(char c,BufferCtx * buffer);
+
+void insert_new_line(BufferCtx * buffer,TermCtx terminal);
+
+// Buffer cursor position translations
 TermPos translate_buff_pos_absolute(BufferCtx buffer);
 
 TermPos translate_buff_pos_relative(BufferCtx buffer, TermCtx terminal);
