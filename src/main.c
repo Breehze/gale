@@ -2,7 +2,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "bufferstuff/utils.h"
 #include "includes/types.h"
 #include "terminal/terminal.h"
 #include "bufferstuff/buffer_ops.h"
@@ -59,26 +61,44 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
     }   
 }
 
+void remove_from_buffer(BufferCtx * buffer){
+    int slice  = locate_slice(buffer->buff_pos,*buffer);
+    if(buffer->mem[buffer->buff_pos] == '\n'){
+        return;
+    };
+    memmove(&buffer->mem[buffer->buff_pos - 1],
+            &buffer->mem[buffer->buff_pos]
+            ,sizeof(char) * (buffer->mem_filled - buffer->buff_pos + 1));
+    
+    buffer->mem_filled--;
+    buffer->slices[slice].len--;
+}
+
 
 void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
+    TermPos a;
     switch (c) {
         case '\e':
             mode = NORMAL;
             change_cursor_to_block();
-        case 8:
-            //remove_from_buffer();
-            break; 
+        case 127:
+            remove_from_buffer(buff);
+            draw_buffer(*buff);
+            a = translate_buff_pos_relative(*buff,terminal);
+            printf("\x1b[43;30H %d:%d",a.y,a.x);
+            move_cursor(a);
+            break;
         case '\n':
             insert_new_line(buff,terminal);
             draw_buffer(*buff);
-            TermPos b = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;30H %d:%d",b.y,b.x);
-            move_cursor(b);
+            a = translate_buff_pos_relative(*buff,terminal);
+            printf("\x1b[43;30H %d:%d",a.y,a.x);
+            move_cursor(a);
             break;
         default:
             insert_into_buffer(c,buff);
             draw_buffer(*buff);
-            TermPos a = translate_buff_pos_relative(*buff,terminal);
+            a = translate_buff_pos_relative(*buff,terminal);
             printf("\x1b[43;30H %d:%d",a.y,a.x);
             move_cursor(a);
             break;
