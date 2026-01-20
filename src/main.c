@@ -63,15 +63,26 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
 
 void remove_from_buffer(BufferCtx * buffer){
     int slice  = locate_slice(buffer->buff_pos,*buffer);
-    if(buffer->mem[buffer->buff_pos] == '\n'){
+    if(buffer->buff_pos - 1 < 0){ 
         return;
-    };
+    }
+    
+    if(buffer->mem[buffer->buff_pos - 1] == '\n'){
+        buffer->slices[slice - 1].len += buffer->slices[slice].len - 1;      
+        memmove(&buffer->slices[slice],             
+                &buffer->slices[slice + 1],
+                (buffer->slices_mem_filled - slice - 1) * sizeof(Slice));
+        buffer->slices_mem_filled--;
+    } else {
+        buffer->slices[slice].len--;
+    }
+    
     memmove(&buffer->mem[buffer->buff_pos - 1],
             &buffer->mem[buffer->buff_pos]
             ,sizeof(char) * (buffer->mem_filled - buffer->buff_pos + 1));
     
+    buffer->buff_pos--;
     buffer->mem_filled--;
-    buffer->slices[slice].len--;
 }
 
 
@@ -81,6 +92,7 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
         case '\e':
             mode = NORMAL;
             change_cursor_to_block();
+            break;
         case 127:
             remove_from_buffer(buff);
             draw_buffer(*buff);
@@ -113,6 +125,7 @@ int main(int argc, char **argv){
     build_buffer(&buff, file);
     update_view_end(&buff, terminal);
     draw_buffer(buff);
+    printf("\x1b[40;30H %d",buff.slices[0].len);
    
     reset_cursor();
     TermPos a,b;
