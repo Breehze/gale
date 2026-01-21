@@ -21,6 +21,8 @@ void insert_into_buffer(char c,BufferCtx * buffer);
 
 void insert_new_line(BufferCtx * buffer,TermCtx terminal);
 
+void remove_from_buffer(BufferCtx * buffer);
+
 // Buffer cursor position translations
 TermPos translate_buff_pos_absolute(BufferCtx buffer);
 

@@ -2,9 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "bufferstuff/utils.h"
 #include "includes/types.h"
 #include "terminal/terminal.h"
 #include "bufferstuff/buffer_ops.h"
@@ -59,30 +57,6 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
         case 'q':
             exit(0);
     }   
-}
-
-void remove_from_buffer(BufferCtx * buffer){
-    int slice  = locate_slice(buffer->buff_pos,*buffer);
-    if(buffer->buff_pos - 1 < 0){ 
-        return;
-    }
-    
-    if(buffer->mem[buffer->buff_pos - 1] == '\n'){
-        buffer->slices[slice - 1].len += buffer->slices[slice].len - 1;      
-        memmove(&buffer->slices[slice],             
-                &buffer->slices[slice + 1],
-                (buffer->slices_mem_filled - slice - 1) * sizeof(Slice));
-        buffer->slices_mem_filled--;
-    } else {
-        buffer->slices[slice].len--;
-    }
-    
-    memmove(&buffer->mem[buffer->buff_pos - 1],
-            &buffer->mem[buffer->buff_pos]
-            ,sizeof(char) * (buffer->mem_filled - buffer->buff_pos + 1));
-    
-    buffer->buff_pos--;
-    buffer->mem_filled--;
 }
 
 

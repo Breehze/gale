@@ -59,4 +59,28 @@ void insert_new_line(BufferCtx * buffer,TermCtx terminal){
     }
    
     buffer->slices_mem_filled += 1;
-};
+}
+
+void remove_from_buffer(BufferCtx * buffer){
+    int slice  = locate_slice(buffer->buff_pos,*buffer);
+    if(buffer->buff_pos - 1 < 0){ 
+        return;
+    }
+    
+    if(buffer->mem[buffer->buff_pos - 1] == '\n'){
+        buffer->slices[slice - 1].len += buffer->slices[slice].len - 1;      
+        memmove(&buffer->slices[slice],             
+                &buffer->slices[slice + 1],
+                (buffer->slices_mem_filled - slice - 1) * sizeof(Slice));
+        buffer->slices_mem_filled--;
+    } else {
+        buffer->slices[slice].len--;
+    }
+    
+    memmove(&buffer->mem[buffer->buff_pos - 1],
+            &buffer->mem[buffer->buff_pos]
+            ,sizeof(char) * (buffer->mem_filled - buffer->buff_pos + 1));
+    
+    buffer->buff_pos--;
+    buffer->mem_filled--;
+}
