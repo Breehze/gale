@@ -22,6 +22,7 @@ typedef struct{
 }BufferView;
 
 typedef struct {
+    char fpath[100];
     char * mem;
     size_t mem_filled;
     size_t mem_len;

@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "includes/types.h"
 #include "terminal/terminal.h"
@@ -21,6 +22,12 @@ void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx
     pos_change(buff,1);
     update_view_end(buff, terminal);
     draw_buffer(*buff);   
+}
+
+void save_buffer(BufferCtx buffer){
+    FILE * file = fopen(buffer.fpath,"wb");
+    fwrite(buffer.mem,sizeof(buffer.mem[0]),buffer.mem_filled,file);      
+    fclose(file);
 }
 
 void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
@@ -54,7 +61,14 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
             mode = INSERT;
             change_cursor_to_line();           
             break;
+        case 'w':
+            save_buffer(*buff);
+            a = translate_buff_pos_relative(*buff,terminal);
+            printf("\x1b[43;1H Saved");
+            move_cursor(a);
+            break;
         case 'q':
+            clear_screen();
             exit(0);
     }   
 }
@@ -91,15 +105,14 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
     }
 }
 
+
 int main(int argc, char **argv){
     assert(argc == 2);
-    FILE * file = fopen(argv[1],"r");
     BufferCtx buff;
     TermCtx terminal = terminal_setup();
-    build_buffer(&buff, file);
+    build_buffer(&buff,argv[1] );
     update_view_end(&buff, terminal);
     draw_buffer(buff);
-    printf("\x1b[40;30H %d",buff.slices[0].len);
    
     reset_cursor();
     TermPos a,b;

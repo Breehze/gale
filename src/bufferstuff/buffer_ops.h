@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "../includes/types.h"
 
-int build_buffer(BufferCtx* buffer,FILE* file);
+int build_buffer(BufferCtx* buffer,const char * fpath);
 
 // Buffer position modifications
 void update_view_end(BufferCtx* buffer,TermCtx terminal);

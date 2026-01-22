@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "buffer_ops.h"
 #include "utils.h"
 
-int build_buffer(BufferCtx* buffer,FILE* file){
+int build_buffer(BufferCtx* buffer,const char * fpath){
     *buffer = (BufferCtx){
         .mem_len = 100,
         .mem = (char *)malloc(sizeof(char) * 100),
@@ -12,11 +13,13 @@ int build_buffer(BufferCtx* buffer,FILE* file){
         .slices_mem_len = 1000,
         .slices = (Slice *)malloc(sizeof(Slice) * 1000)
     };
-
-    char c;
     
+    FILE * file = fopen(fpath,"r");
+    if(!file) return 1;
+    char c;
     int slice_start = 0;
     int i = 0;
+    
     while ((c = fgetc(file)) != EOF) {
         buffer->mem[i] = c;
         if(c == '\n'){
@@ -35,8 +38,10 @@ int build_buffer(BufferCtx* buffer,FILE* file){
             buffer->mem = new_mem_block;
         }
     }
+    fclose(file);
     buffer->mem_filled = i;
     buffer->view.start = 0;
+    strncpy(buffer->fpath,fpath,100);
     return 0;
 }
 
