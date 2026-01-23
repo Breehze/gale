@@ -19,4 +19,8 @@ TermCtx terminal_setup(void);
 
 void draw_buffer(BufferCtx buffer);
 
+void SBAR_draw(StatusBar bar);
+
+void SBAR_update(StatusBar * bar,TermPos buffer_pos,char * open_fname,Mode mode);
+
 #endif 

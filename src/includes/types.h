@@ -16,6 +16,11 @@ typedef struct{
     int len;
 }Slice;
 
+typedef enum{
+    INSERT,
+    NORMAL
+}Mode;
+
 typedef struct{
     int start;
     int end;
@@ -32,6 +37,13 @@ typedef struct {
     Slice *slices;
     BufferView view;
 }BufferCtx;
+
+typedef struct {
+    TermPos pos;
+    TermPos buffer_pos;
+    char * open_fname;
+    Mode mode;
+}StatusBar;
 
 #endif
 

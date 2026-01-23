@@ -8,11 +8,6 @@
 #include "terminal/terminal.h"
 #include "bufferstuff/buffer_ops.h"
 
-typedef enum{
-    INSERT,
-    NORMAL
-}Mode;
-
 Mode mode = NORMAL;
 
 void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx* buffer,int step)){
@@ -30,32 +25,20 @@ void save_buffer(BufferCtx buffer){
     fclose(file);
 }
 
-void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
+void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_bar){
     TermPos a,b;
     switch (c) {
         case 'h':
             move_n_render(buff,terminal,move_buff_pos_left);
-            a = translate_buff_pos_relative(*buff,terminal);
-            move_cursor(a);
             break;
         case 'j':
             move_n_render(buff,terminal,move_buff_pos_down);
-            a = translate_buff_pos_relative(*buff,terminal);
-            b = translate_buff_pos_absolute(*buff);
-            printf("\x1b[43;30H %d:%d",b.y,b.x);
-            move_cursor(a);
             break;
         case 'k':
             move_n_render(buff,terminal,move_buff_pos_up);
-            a = translate_buff_pos_relative(*buff,terminal);
-            b = translate_buff_pos_absolute(*buff);
-            printf("\x1b[43;30H %d:%d",b.y,b.x);
-            move_cursor(a);
             break;
         case 'l':
             move_n_render(buff,terminal,move_buff_pos_right);
-            a = translate_buff_pos_relative(*buff,terminal);
-            move_cursor(a);
             break;
         case 'i':
             mode = INSERT;
@@ -64,17 +47,21 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal){
         case 'w':
             save_buffer(*buff);
             a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;1H Saved");
+            printf("\x1b[43;15H written to \"%s\"",buff->fpath);
             move_cursor(a);
             break;
         case 'q':
             clear_screen();
             exit(0);
     }   
+    a = translate_buff_pos_relative(*buff,terminal);
+    SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+    SBAR_draw(*status_bar);
+    move_cursor(a);
 }
 
 
-void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
+void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar){
     TermPos a;
     switch (c) {
         case '\e':
@@ -83,35 +70,24 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
             break;
         case 127:
             remove_from_buffer(buff);
-            draw_buffer(*buff);
-            a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;30H %d:%d",a.y,a.x);
-            move_cursor(a);
             break;
         case '\n':
             insert_new_line(buff,terminal);
-            draw_buffer(*buff);
-            a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;30H %d:%d",a.y,a.x);
-            move_cursor(a);
             break;
         case 9:
             for(int i = 0;i < 4;i++){
                 insert_into_buffer(' ',buff);
             }
-            draw_buffer(*buff);
-            a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;30H %d:%d",a.y,a.x);
-            move_cursor(a);
             break;
         default:
             insert_into_buffer(c,buff);
-            draw_buffer(*buff);
-            a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;30H %d:%d",a.y,a.x);
-            move_cursor(a);
             break;
     }
+    draw_buffer(*buff);
+    a = translate_buff_pos_relative(*buff,terminal);
+    SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+    SBAR_draw(*status_bar);
+    move_cursor(a);
 }
 
 
@@ -119,20 +95,29 @@ int main(int argc, char **argv){
     assert(argc == 2);
     BufferCtx buff;
     TermCtx terminal = terminal_setup();
+    StatusBar bar = (StatusBar){
+        .mode = NORMAL,
+        .pos = (TermPos){.x = terminal.cols ,.y = terminal.rows},
+        .open_fname = buff.fpath,
+        .buffer_pos = (TermPos){.x = 1,.y = 1}
+    };
+    terminal.rows -= 1;
     build_buffer(&buff,argv[1] );
     update_view_end(&buff, terminal);
     draw_buffer(buff);
+    SBAR_draw(bar);
    
     reset_cursor();
+    TermPos a;
     for(;;){
         char c;
         while (read(STDIN_FILENO, &c, 1) == 1) {
             switch (mode) {
                 case NORMAL:
-                    normal_mode(c,&buff,terminal);
+                    normal_mode(c,&buff,terminal,&bar);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,terminal);
+                    insert_mode(c,&buff,terminal,&bar);
                     break;
             }
         }
