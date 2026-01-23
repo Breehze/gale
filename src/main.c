@@ -95,6 +95,15 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal){
             printf("\x1b[43;30H %d:%d",a.y,a.x);
             move_cursor(a);
             break;
+        case 9:
+            for(int i = 0;i < 4;i++){
+                insert_into_buffer(' ',buff);
+            }
+            draw_buffer(*buff);
+            a = translate_buff_pos_relative(*buff,terminal);
+            printf("\x1b[43;30H %d:%d",a.y,a.x);
+            move_cursor(a);
+            break;
         default:
             insert_into_buffer(c,buff);
             draw_buffer(*buff);
@@ -115,7 +124,6 @@ int main(int argc, char **argv){
     draw_buffer(buff);
    
     reset_cursor();
-    TermPos a,b;
     for(;;){
         char c;
         while (read(STDIN_FILENO, &c, 1) == 1) {
