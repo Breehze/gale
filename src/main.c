@@ -19,11 +19,6 @@ void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx
     draw_buffer(*buff);   
 }
 
-void save_buffer(BufferCtx buffer){
-    FILE * file = fopen(buffer.fpath,"wb");
-    fwrite(buffer.mem,sizeof(buffer.mem[0]),buffer.mem_filled,file);      
-    fclose(file);
-}
 
 void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_bar){
     TermPos a,b;

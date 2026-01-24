@@ -28,4 +28,7 @@ TermPos translate_buff_pos_absolute(BufferCtx buffer);
 
 TermPos translate_buff_pos_relative(BufferCtx buffer, TermCtx terminal);
 
+// File/Buffer operations
+void save_buffer(BufferCtx buffer);
+
 #endif

@@ -6,6 +6,13 @@
 #include "utils.h"
 
 
+void save_buffer(BufferCtx buffer){
+    FILE * file = fopen(buffer.fpath,"wb");
+    fwrite(buffer.mem,sizeof(buffer.mem[0]),buffer.mem_filled,file);      
+    fclose(file);
+}
+
+
 void insert_into_buffer(char c,BufferCtx * buffer){
     if(++buffer->mem_filled > buffer->mem_len){
         buffer->mem_len *= 10;
