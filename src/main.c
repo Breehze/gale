@@ -54,9 +54,12 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
             clear_screen();
             exit(0);
     }   
+    if(status_bar){
+        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+        SBAR_draw(*status_bar);
+    }
+        
     a = translate_buff_pos_relative(*buff,terminal);
-    SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-    SBAR_draw(*status_bar);
     move_cursor(a);
 }
 
@@ -84,9 +87,11 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             break;
     }
     draw_buffer(*buff);
+    if(status_bar){
+        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+        SBAR_draw(*status_bar);
+    }
     a = translate_buff_pos_relative(*buff,terminal);
-    SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-    SBAR_draw(*status_bar);
     move_cursor(a);
 }
 
