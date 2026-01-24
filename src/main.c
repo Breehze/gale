@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "bufferstuff/utils.h"
 #include "includes/types.h"
 #include "terminal/terminal.h"
 #include "bufferstuff/buffer_ops.h"
@@ -19,9 +20,27 @@ void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx
     draw_buffer(*buff);   
 }
 
+void jump_next_word(BufferCtx * buff,int step){
+    //step not implemented
+    int slice = locate_slice(buff->buff_pos,*buff);
+    
+    size_t i,state = 0;
+    for(i = buff->buff_pos;i < buff->mem_filled;i++){
+        if(state && buff->mem[i] != ' '){
+            break;
+        }
+        state = (!state && (buff->mem[i] == ' ' || buff->mem[i] == '\n')) ? 1 : 0; 
+    }
+    buff->buff_pos =(i >= buff->mem_filled) ? buff->mem_filled - 1 : i;
+    
+    if(slice > buff->view.end){
+        buff->view.start += 1;
+    }
+};
+
 
 void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_bar){
-    TermPos a,b;
+    TermPos a;
     switch (c) {
         case 'h':
             move_n_render(buff,terminal,move_buff_pos_left);
@@ -40,6 +59,9 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
             change_cursor_to_line();           
             break;
         case 'w':
+            move_n_render(buff,terminal,jump_next_word);
+            break;
+        case 's':
             save_buffer(*buff);
             a = translate_buff_pos_relative(*buff,terminal);
             printf("\x1b[43;15H written to \"%s\"",buff->fpath);
@@ -108,7 +130,6 @@ int main(int argc, char **argv){
     SBAR_draw(bar);
    
     reset_cursor();
-    TermPos a;
     for(;;){
         char c;
         while (read(STDIN_FILENO, &c, 1) == 1) {
