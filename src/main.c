@@ -38,6 +38,24 @@ void jump_next_word(BufferCtx * buff,int step){
     }
 };
 
+void jump_previous_word(BufferCtx * buff,int step){
+    //step not implemented 
+    size_t i,state = 0;
+    for(i = buff->buff_pos;i > 0;i--){
+        if(state && (buff->mem[i] != ' ')){
+            break;
+        }
+        state = (!state && (buff->mem[i] == ' ' || buff->mem[i] == '\n')) ? 1 : 0; 
+    }
+    buff->buff_pos =(i >= buff->mem_filled) ? buff->mem_filled - 1 : i;
+    
+    
+    int slice = locate_slice(buff->buff_pos,*buff);
+    if(slice < buff->view.start){
+        buff->view.start -= 1;
+    }
+}
+
 
 void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_bar){
     TermPos a;
@@ -60,6 +78,9 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
             break;
         case 'w':
             move_n_render(buff,terminal,jump_next_word);
+            break;
+        case 'b':
+            move_n_render(buff,terminal,jump_previous_word);
             break;
         case 's':
             save_buffer(*buff);
