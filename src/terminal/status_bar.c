@@ -4,9 +4,9 @@
 
 void SBAR_draw(StatusBar bar){
     if(bar.mode == NORMAL){   
-        printf("\x1b[30m\x1b[41m\x1b[%d;1H NORMAL \x1b[0m",bar.pos.y);
+        printf("\x1b[30m\x1b[41m\x1b[%d;1H NORMAL ◥\x1b[0m",bar.pos.y);
     }else{   
-        printf("\x1b[30m\x1b[41m\x1b[%d;1H INSERT \x1b[0m",bar.pos.y);
+        printf("\x1b[30m\x1b[41m\x1b[%d;1H INSERT ◥\x1b[0m",bar.pos.y);
     }
     
     printf("\x1b[%d;%dH %s",bar.pos.y,bar.pos.x - 30,bar.open_fname);
