@@ -49,7 +49,7 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
         case 's':
             save_buffer(*buff);
             a = translate_buff_pos_relative(*buff,terminal);
-            printf("\x1b[43;15H written to \"%s\"",buff->fpath);
+            printf("\x1b[%d;15H written to \"%s\"",status_bar->pos.y,buff->fpath);
             move_cursor(a);
             break;
         case 'q':
