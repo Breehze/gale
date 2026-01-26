@@ -20,42 +20,6 @@ void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx
     draw_buffer(*buff);   
 }
 
-void jump_next_word(BufferCtx * buff,int step){
-    //step not implemented
-    int slice = locate_slice(buff->buff_pos,*buff);
-    
-    size_t i,state = 0;
-    for(i = buff->buff_pos;i < buff->mem_filled;i++){
-        if(state && buff->mem[i] != ' '){
-            break;
-        }
-        state = (!state && (buff->mem[i] == ' ' || buff->mem[i] == '\n')) ? 1 : 0; 
-    }
-    buff->buff_pos =(i >= buff->mem_filled) ? buff->mem_filled - 1 : i;
-    
-    if(slice > buff->view.end){
-        buff->view.start += 1;
-    }
-};
-
-void jump_previous_word(BufferCtx * buff,int step){
-    //step not implemented 
-    size_t i,state = 0;
-    for(i = buff->buff_pos;i > 0;i--){
-        if(state && (buff->mem[i] != ' ')){
-            break;
-        }
-        state = (!state && (buff->mem[i] == ' ' || buff->mem[i] == '\n')) ? 1 : 0; 
-    }
-    buff->buff_pos =(i >= buff->mem_filled) ? buff->mem_filled - 1 : i;
-    
-    
-    int slice = locate_slice(buff->buff_pos,*buff);
-    if(slice < buff->view.start){
-        buff->view.start -= 1;
-    }
-}
-
 
 void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_bar){
     TermPos a;

@@ -16,6 +16,10 @@ void move_buff_pos_left(BufferCtx* buffer,int step);
 
 void move_buff_pos_right(BufferCtx* buffer, int step);
 
+void jump_next_word(BufferCtx * buff,int step);
+
+void jump_previous_word(BufferCtx * buff,int step);
+
 // Buffer content modifications
 void insert_into_buffer(char c,BufferCtx * buffer);
 
