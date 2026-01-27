@@ -14,10 +14,14 @@ Mode mode = NORMAL;
 void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx* buffer,int step)){
     // Takes in a function which changes position of a cursor within a buffer
     // Will have to take step argument eventually
-    clear_screen();
+    
+    int view_start_old = buff->view.start;
+    int view_end_old = buff->view.end;
     pos_change(buff,1);
     update_view_end(buff, terminal);
-    draw_buffer(*buff);   
+    if(view_start_old != buff->view.start || view_end_old != buff->view.end){
+        draw_buffer(*buff);   
+    }
 }
 
 
