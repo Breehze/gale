@@ -32,7 +32,7 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
             }
         }
         i++;
-        if(i > buffer->mem_len){
+        if(i > buffer->mem_len - 1){
             buffer->mem_len *= 10;
             char * new_mem_block = (char *)realloc(buffer->mem,buffer->mem_len);
             buffer->mem = new_mem_block;
