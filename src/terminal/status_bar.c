@@ -9,8 +9,8 @@ void SBAR_draw(StatusBar bar){
         printf("\x1b[30m\x1b[41m\x1b[%d;1H INSERT ◥\x1b[0m",bar.pos.y);
     }
     
-    printf("\x1b[%d;%dH %s",bar.pos.y,bar.pos.x - 30,bar.open_fname);
-    printf("\x1b[%d;%dH %d:%d",bar.pos.y,bar.pos.x - 10,bar.buffer_pos.y,bar.buffer_pos.x);
+    printf("\x1b[%d;%dH %s",bar.pos.y,bar.pos.x - 50,bar.open_fname);
+    printf("\x1b[%d;%dH %d:%d   ",bar.pos.y,bar.pos.x - 20,bar.buffer_pos.y,bar.buffer_pos.x);
     fflush(stdout);
 };
 

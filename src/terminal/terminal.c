@@ -92,23 +92,3 @@ void draw_buffer(BufferCtx buffer){
     printf("\x1b[H%s",out);
     fflush(stdout);     
 }
-/*void draw_buffer(BufferCtx buffer){
-    char out[10000] = {0};
-    int i2 = 0;
-    for(int i = buffer.view.start; i <= buffer.view.end;i++){
-        int slice_start = get_slice_start(i, buffer);
-        for(int j = slice_start;j < slice_start + buffer.slices[i].len;j++){
-            out[i2]= buffer.mem[j];
-            i2++;
-        }
-    }
-    out[i2] = '\0';
-
-    while(i2 > 0 && (out[i2-1] == '\n' || out[i2-1] == '\r')){
-        i2--;
-        out[i2] = '\0';
-    }
-    
-    printf("\x1b[H%s",out);
-    fflush(stdout);      
-}*/
