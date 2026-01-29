@@ -5,46 +5,6 @@
 #include "buffer_ops.h"
 #include "utils.h"
 
-int build_buffer(BufferCtx* buffer,const char * fpath){
-    *buffer = (BufferCtx){
-        .mem_len = 100,
-        .mem = (char *)malloc(sizeof(char) * 100),
-        .slices_mem_filled = 0,
-        .slices_mem_len = 1000,
-        .slices = (Slice *)malloc(sizeof(Slice) * 1000)
-    };
-    
-    FILE * file = fopen(fpath,"r");
-    if(!file) return 1;
-    char c;
-    int slice_start = 0;
-    int i = 0;
-    
-    while ((c = fgetc(file)) != EOF) {
-        buffer->mem[i] = c;
-        if(c == '\n'){
-            buffer->slices[buffer->slices_mem_filled].len = i - slice_start + 1;
-            buffer->slices_mem_filled++; 
-            slice_start = i+1;     
-            if(buffer->slices_mem_filled  > buffer->slices_mem_len){
-                buffer->slices_mem_len *= 10;
-                buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len);
-            }
-        }
-        i++;
-        if(i > buffer->mem_len - 1){
-            buffer->mem_len *= 10;
-            char * new_mem_block = (char *)realloc(buffer->mem,buffer->mem_len);
-            buffer->mem = new_mem_block;
-        }
-    }
-    fclose(file);
-    buffer->mem_filled = i;
-    buffer->view.start = 0;
-    strncpy(buffer->fpath,fpath,100);
-    return 0;
-}
-
 
 void move_buff_pos_up(BufferCtx* buffer,int step){ 
     int slice = locate_slice(buffer->buff_pos,*buffer);
