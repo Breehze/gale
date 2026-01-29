@@ -92,19 +92,3 @@ void jump_previous_word(BufferCtx * buff,int step){
         buff->view.start -= 1;
     }
 }
-
-
-void update_view_end(BufferCtx* buffer,TermCtx terminal){
-    int lines_loaded = 0;
-    int i = buffer->view.start;
-    while(lines_loaded < terminal.rows && i < buffer->slices_mem_filled){
-        int slice_lines = (buffer->slices[i].len+terminal.cols) / terminal.cols;
-        if(lines_loaded + slice_lines  > terminal.rows){
-            break;
-        }
-        
-        lines_loaded += slice_lines; 
-        i++;
-    }
-    buffer->view.end = i-1;
-}

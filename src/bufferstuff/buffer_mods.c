@@ -47,6 +47,22 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
 }
 
 
+void update_view_end(BufferCtx* buffer,TermCtx terminal){
+    int lines_loaded = 0;
+    int i = buffer->view.start;
+    while(lines_loaded < terminal.rows && i < buffer->slices_mem_filled){
+        int slice_lines = (buffer->slices[i].len+terminal.cols) / terminal.cols;
+        if(lines_loaded + slice_lines  > terminal.rows){
+            break;
+        }
+        
+        lines_loaded += slice_lines; 
+        i++;
+    }
+    buffer->view.end = i-1;
+}
+
+
 void save_buffer(BufferCtx buffer){
     FILE * file = fopen(buffer.fpath,"wb");
     fwrite(buffer.mem,sizeof(buffer.mem[0]),buffer.mem_filled,file);      
