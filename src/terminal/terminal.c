@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -68,6 +69,7 @@ TermCtx terminal_setup(void){
 
 void draw_buffer(BufferCtx buffer){
     char out[100000] = {0};
+    memset(out,' ',100000);
     int i2 = 0;
     for(int i = buffer.view.start; i <= buffer.view.end;i++){
         int slice_start = get_slice_start(i, buffer);
@@ -81,14 +83,10 @@ void draw_buffer(BufferCtx buffer){
             }
         }
         out[i2] = '\n';
+        i2++;
     }
-    out[i2] = '\0';
-
-    while(i2 > 0 && (out[i2-1] == '\n' || out[i2-1] == '\r')){
-        i2--;
-        out[i2] = '\0';
-    }
-    
+    out[(terminal.rows * terminal.cols) - 1] = '\0';
+     
     printf("\x1b[H%s",out);
     fflush(stdout);     
 }
