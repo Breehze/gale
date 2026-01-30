@@ -113,16 +113,14 @@ void insert_new_line(BufferCtx * buffer,TermCtx terminal){
 
     buffer->buff_pos +=1;
 
-    if(buffer->slices_mem_filled > terminal.rows - 1 ){
-        if(locate_slice(buffer->buff_pos,*buffer) > terminal.rows - 1){
-            buffer->view.start += 1;
-            update_view_end(buffer,terminal);
-        }
-    }else{
-        buffer->view.end +=1;
-    }
-   
     buffer->slices_mem_filled += 1;
+    curr_slice += 1;  
+
+    if(curr_slice > buffer->view.end) {
+        buffer->view.start++;
+    }
+
+    update_view_end(buffer, terminal);
 }
 
 void remove_from_buffer(BufferCtx * buffer){
