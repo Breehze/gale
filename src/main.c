@@ -50,6 +50,14 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
         case 'b':
             move_n_render(buff,terminal,jump_previous_word);
             break;
+        case 'o':
+            move_n_render(buff,terminal,move_buff_pos_down);
+            insert_new_line(buff,terminal);
+            mode = INSERT;
+            change_cursor_to_line();
+            move_n_render(buff,terminal,move_buff_pos_up);
+            draw_buffer(*buff);
+            break;
         case 's':
             save_buffer(*buff);
             a = translate_buff_pos_relative(*buff,terminal);
@@ -114,11 +122,11 @@ int main(int argc, char **argv){
         .open_fname = buff.fpath,
         .buffer_pos = (TermPos){.x = 1,.y = 1}
     };
-    //terminal.rows -= 1;
+    terminal.rows -= 1;
     build_buffer(&buff,argv[1] );
     update_view_end(&buff, terminal);
     draw_buffer(buff);
-    //SBAR_draw(bar);
+    SBAR_draw(bar);
    
     reset_cursor();
     for(;;){
@@ -126,10 +134,10 @@ int main(int argc, char **argv){
         while (read(STDIN_FILENO, &c, 1) == 1) {
             switch (mode) {
                 case NORMAL:
-                    normal_mode(c,&buff,terminal,NULL);
+                    normal_mode(c,&buff,terminal,&bar);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,terminal,NULL);
+                    insert_mode(c,&buff,terminal,&bar);
                     break;
             }
         }
