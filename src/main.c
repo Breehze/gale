@@ -89,6 +89,7 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             break;
         case 127:
             remove_from_buffer(buff);
+            update_view_end(buff, terminal);
             break;
         case '\n':
             insert_new_line(buff,terminal);

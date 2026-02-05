@@ -139,6 +139,9 @@ void remove_from_buffer(BufferCtx * buffer){
         if(buffer->view.end >= buffer->slices_mem_filled) {
             buffer->view.end = buffer->slices_mem_filled - 1;
         }
+        if(slice - 1 < buffer->view.start){
+            buffer->view.start -= 1;
+        }
     } else {
         buffer->slices[slice].len--;
     }
