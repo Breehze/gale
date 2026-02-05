@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/select.h>
 #include <unistd.h>
 
 #include "bufferstuff/utils.h"
@@ -115,6 +116,10 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
 
 int main(int argc, char **argv){
     assert(argc == 2);
+    fd_set descriptors;
+    FD_ZERO(&descriptors);
+    FD_SET(STDIN_FILENO, &descriptors);
+
     BufferCtx buff;
     TermCtx terminal = terminal_setup();
     StatusBar bar = (StatusBar){
@@ -124,15 +129,22 @@ int main(int argc, char **argv){
         .buffer_pos = (TermPos){.x = 1,.y = 1}
     };
     terminal.rows -= 1;
+    
     build_buffer(&buff,argv[1] );
     update_view_end(&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);
-   
+    
     reset_cursor();
     for(;;){
+        int ready = select(STDIN_FILENO + 1, &descriptors, NULL, NULL, NULL);
+        
+        if(!ready){
+            continue;
+        }
+
         char c;
-        while (read(STDIN_FILENO, &c, 1) == 1) {
+        if (read(STDIN_FILENO, &c, 1) == 1) {
             switch (mode) {
                 case NORMAL:
                     normal_mode(c,&buff,terminal,&bar);
