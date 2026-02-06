@@ -130,7 +130,8 @@ int main(int argc, char **argv){
     };
     terminal.rows -= 1;
     
-    build_buffer(&buff,argv[1] );
+    build_buffer(&buff,argv[1]); 
+    //printf("%s",buff.mem);
     update_view_end(&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);

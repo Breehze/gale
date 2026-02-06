@@ -19,3 +19,16 @@ int get_slice_start(int slice_indx, BufferCtx buffer) {
     }
     return start;
 }
+
+int init_buffer_on_empty_file(BufferCtx* buffer){
+    if(buffer->mem_filled){ return 1;}
+    if(buffer->slices_mem_filled) {return 1;}
+    buffer->slices_mem_filled = 1;
+    
+    if(!buffer->slices[0].len){
+        buffer->slices[0].len = 1;
+        buffer->mem[0] = '\n';
+        buffer->mem_filled ++;
+    }   
+    return 0;
+}

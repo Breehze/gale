@@ -12,7 +12,8 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
         .mem = (char *)malloc(sizeof(char) * 100),
         .slices_mem_filled = 0,
         .slices_mem_len = 1000,
-        .slices = (Slice *)malloc(sizeof(Slice) * 1000)
+        .slices = (Slice *)calloc(1000,sizeof(Slice)),
+        .buff_pos = 0,
     };
     
     FILE * file = fopen(fpath,"r");
@@ -29,7 +30,7 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
             slice_start = i+1;     
             if(buffer->slices_mem_filled  > buffer->slices_mem_len){
                 buffer->slices_mem_len *= 10;
-                buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len);
+                buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len * sizeof(Slice));
             }
         }
         i++;
@@ -40,9 +41,15 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
         }
     }
     fclose(file);
+         
     buffer->mem_filled = i;
     buffer->view.start = 0;
     strncpy(buffer->fpath,fpath,100);
+    
+    if(!i){
+        init_buffer_on_empty_file(buffer);
+    }
+    
     return 0;
 }
 
