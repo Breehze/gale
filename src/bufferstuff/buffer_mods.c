@@ -123,7 +123,7 @@ void insert_new_line(BufferCtx * buffer,TermCtx terminal){
     buffer->slices_mem_filled += 1;
     curr_slice += 1;  
 
-    if(curr_slice > buffer->view.end) {
+    if(curr_slice > buffer->view.end && buffer->view.end >= terminal.rows-1) {
         buffer->view.start++;
     }
 
