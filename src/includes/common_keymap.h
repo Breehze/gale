@@ -16,4 +16,6 @@ typedef void (*handler)(Inputs,Error);
 
 handler call0(char *);
 
+int get_nest_count();
+
 #endif

@@ -24,7 +24,7 @@ def create_switch_function(state_machine_layer : dict,nest:int,result : str) -> 
     if not len(state_machine_layer):
         return result,nest
     next_layer = {}
-    function = f"handler call{nest}(char * switcheroo){{\n   switch(switcheroo[{nest}]){{\n"
+    function = f"handler call{nest}(char * switcheroo){{\n   update_nest_count({nest});\n   switch(switcheroo[{nest}]){{\n"
     for state,next_state in state_machine_layer.items():
         if type(next_state) == type(dict()):
             case = f"       case '{state}': return call{nest+1}(switcheroo);\n"
@@ -38,7 +38,7 @@ def create_switch_function(state_machine_layer : dict,nest:int,result : str) -> 
 
 
 def generate_keymap(keymap:dict):
-    content = "#include <stdlib.h>\n\n#include \"keymap_api.h\"\n\n"
+    content = "#include <stdlib.h>\n\n#include \"keymap_api.h\"\n#include \"../includes/common_keymap.h\"\n\n"
     
     state_machines = dict()
     for key,val in keymap.items():

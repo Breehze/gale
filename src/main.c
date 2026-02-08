@@ -2,10 +2,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
 
-#include "bufferstuff/utils.h"
 #include "includes/types.h"
 #include "includes/common_keymap.h"
 #include "terminal/terminal.h"
@@ -13,17 +13,25 @@
 
 Mode mode = NORMAL;
 
-void normal_mode(char c, BufferCtx * buff,TermCtx *terminal,StatusBar * status_bar){
+char combo_buff[100] = {0};
+int combo_buff_index = 0;
+
+void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar * status_bar){
     int view_start_old = buff->view.start;
     int view_end_old = buff->view.end;
     
-    handler handler = call0(&c);
+    handler handler = call0(sequence);
     WrappedInput handler_input = (WrappedInput){.buff = buff,.term = terminal};
     
     if(handler){
         handler(&handler_input,NULL);
+    }   
+
+    if(handler || (get_nest_count() < combo_buff_index)){
+        memset(combo_buff,0,sizeof(combo_buff));
+        combo_buff_index = 0;
     }
-    
+        
     update_view_end(buff, *terminal);
     if(view_start_old != buff->view.start || view_end_old != buff->view.end){
         draw_buffer(*buff);   
@@ -33,7 +41,7 @@ void normal_mode(char c, BufferCtx * buff,TermCtx *terminal,StatusBar * status_b
         SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
         SBAR_draw(*status_bar);
     }
-        
+    
     TermPos a = translate_buff_pos_relative(*buff,*terminal);
     move_cursor(a);
 
@@ -90,7 +98,6 @@ int main(int argc, char **argv){
     terminal.rows -= 1;
     
     build_buffer(&buff,argv[1]); 
-    //printf("%s",buff.mem);
     update_view_end(&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);
@@ -105,9 +112,10 @@ int main(int argc, char **argv){
 
         char c;
         if (read(STDIN_FILENO, &c, 1) == 1) {
+            combo_buff[combo_buff_index++] = c;
             switch (mode) {
                 case NORMAL:
-                    normal_mode(c,&buff,&terminal,&bar);
+                    normal_mode(combo_buff,&buff,&terminal,&bar);
                     break;
                 case INSERT:
                     insert_mode(c,&buff,terminal,&bar);
