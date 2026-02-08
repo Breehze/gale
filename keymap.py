@@ -7,6 +7,8 @@ keymap = {
     "k" : "MOV_CURSOR_UP",
     "j" : "MOV_CURSOR_DOWN",
     "h" : "MOV_CURSOR_LEFT",
+    "w" : "MOV_CURSOR_NEXT_WORD",
+    "b" : "MOV_CURSOR_PREVIOUS_WORD",
     "q" : "EXIT"
 }
 

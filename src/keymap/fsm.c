@@ -12,6 +12,8 @@ handler call0(char * switcheroo){
        case 'k': return &MOV_CURSOR_UP;
        case 'j': return &MOV_CURSOR_DOWN;
        case 'h': return &MOV_CURSOR_LEFT;
+       case 'w': return &MOV_CURSOR_NEXT_WORD;
+       case 'b': return &MOV_CURSOR_PREVIOUS_WORD;
        case 'q': return &EXIT;
        default: return NULL;
    }

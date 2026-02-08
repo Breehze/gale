@@ -18,6 +18,10 @@ void MOV_CURSOR_LEFT(Inputs,Error);
 
 void MOV_CURSOR_RIGHT(Inputs,Error);
 
+void MOV_CURSOR_NEXT_WORD(Inputs,Error);
+
+void MOV_CURSOR_PREVIOUS_WORD(Inputs,Error);
+
 void EXIT(Inputs inputs,Error error);
 
 

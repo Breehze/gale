@@ -28,6 +28,18 @@ void MOV_CURSOR_RIGHT(Inputs inputs, Error error){
     move_buff_pos_right(buff,1);
 }
 
+void MOV_CURSOR_NEXT_WORD(Inputs inputs, Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    TermCtx * term = ((WrappedInput *)inputs)->term;
+    jump_next_word(buff,1);
+}
+
+void MOV_CURSOR_PREVIOUS_WORD(Inputs inputs, Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    TermCtx * term = ((WrappedInput *)inputs)->term;
+    jump_previous_word(buff,1);
+}
+
 void EXIT(Inputs inputs,Error error){
     exit(0);
 }
