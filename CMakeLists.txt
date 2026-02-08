@@ -9,9 +9,10 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Process subdirectories
 add_subdirectory(src/bufferstuff)
 add_subdirectory(src/terminal)
+add_subdirectory(src/keymap)
 
 # Main executable
 add_executable(gale src/main.c)
 
 # Link the module libraries
-target_link_libraries(gale buffer terminal)
+target_link_libraries(gale buffer terminal keymap)

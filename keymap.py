@@ -3,10 +3,11 @@ from src.keymap.generator import generate_keymap
 from typing import Tuple
 
 keymap = {
-    "viw" : "SELECT_WORD",
-    "vid" : "IDK",
+    "l" : "MOV_CURSOR_RIGHT",
+    "k" : "MOV_CURSOR_UP",
     "j" : "MOV_CURSOR_DOWN",
-    "h" : "MOV_CURSOR_LEFT"
+    "h" : "MOV_CURSOR_LEFT",
+    "q" : "EXIT"
 }
 
 

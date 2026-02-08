@@ -83,3 +83,5 @@ Desktop.ini
 conanbuildinfo.*
 conan.lock
 .vcpkg/
+
+__pycache__

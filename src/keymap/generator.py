@@ -38,7 +38,7 @@ def create_switch_function(state_machine_layer : dict,nest:int,result : str) -> 
 
 
 def generate_keymap(keymap:dict):
-    content = "#include <stdlib.h>\n\n#include \"api.h\"\n\ntypedef void (*handler)(void);\n\n"
+    content = "#include <stdlib.h>\n\n#include \"keymap_api.h\"\n\n"
     
     state_machines = dict()
     for key,val in keymap.items():
