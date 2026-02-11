@@ -12,14 +12,14 @@
 
 Mode mode = NORMAL;
 
-void move_n_render(BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx* buffer,int step)){
+void move_n_render(int vert_direction,BufferCtx *buff,TermCtx terminal,void (*pos_change)(BufferCtx* buffer,int step)){
     // Takes in a function which changes position of a cursor within a buffer
     // Will have to take step argument eventually
         
     int view_start_old = buff->view.start;
     int view_end_old = buff->view.end;
     pos_change(buff,1);
-    update_view_end(buff, terminal);
+    update_view_end(vert_direction,buff, terminal);
     if(view_start_old != buff->view.start || view_end_old != buff->view.end){
         draw_buffer(*buff);   
     }
@@ -30,33 +30,33 @@ void normal_mode(char c, BufferCtx * buff,TermCtx terminal,StatusBar * status_ba
     TermPos a;
     switch (c) {
         case 'h':
-            move_n_render(buff,terminal,move_buff_pos_left);
+            move_n_render(0,buff,terminal,move_buff_pos_left);
             break;
         case 'j':
-            move_n_render(buff,terminal,move_buff_pos_down);
+            move_n_render(0,buff,terminal,move_buff_pos_down);
             break;
         case 'k':
-            move_n_render(buff,terminal,move_buff_pos_up);
+            move_n_render(1,buff,terminal,move_buff_pos_up);
             break;
         case 'l':
-            move_n_render(buff,terminal,move_buff_pos_right);
+            move_n_render(0,buff,terminal,move_buff_pos_right);
             break;
         case 'i':
             mode = INSERT;
             change_cursor_to_line();           
             break;
         case 'w':
-            move_n_render(buff,terminal,jump_next_word);
+            move_n_render(0,buff,terminal,jump_next_word);
             break;
         case 'b':
-            move_n_render(buff,terminal,jump_previous_word);
+            move_n_render(1,buff,terminal,jump_previous_word);
             break;
         case 'o':
-            move_n_render(buff,terminal,move_buff_pos_down);
+            move_n_render(0,buff,terminal,move_buff_pos_down);
             insert_new_line(buff,terminal);
             mode = INSERT;
             change_cursor_to_line();
-            move_n_render(buff,terminal,move_buff_pos_up);
+            move_n_render(1,buff,terminal,move_buff_pos_up);
             draw_buffer(*buff);
             break;
         case 's':
@@ -90,7 +90,7 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             break;
         case 127:
             remove_from_buffer(buff);
-            update_view_end(buff, terminal);
+            update_view_end(0,buff, terminal);
             break;
         case '\n':
             insert_new_line(buff,terminal);
@@ -132,7 +132,7 @@ int main(int argc, char **argv){
     
     build_buffer(&buff,argv[1]); 
     //printf("%s",buff.mem);
-    update_view_end(&buff, terminal);
+    update_view_end(0,&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);
     

@@ -6,7 +6,7 @@
 int build_buffer(BufferCtx* buffer,const char * fpath);
 
 // Buffer position modifications
-void update_view_end(BufferCtx* buffer,TermCtx terminal);
+void update_view_end(int direction,BufferCtx* buffer,TermCtx terminal);
 
 void move_buff_pos_up(BufferCtx* buffer,int step);
 

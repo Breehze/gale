@@ -73,7 +73,9 @@ void draw_buffer(BufferCtx buffer){
     int i2 = 0;
     for(int i = buffer.view.start; i <= buffer.view.end;i++){
         int slice_start = get_slice_start(i, buffer);
-        for(int j = slice_start;j < slice_start + terminal.cols ;j++){
+        int rows_taken = (buffer.slices[i].len / terminal.cols)+1;
+        
+        for(int j = slice_start;j < slice_start + (terminal.cols * rows_taken);j++){
             if(j < slice_start + buffer.slices[i].len-1){
                 out[i2]= buffer.mem[j];
                 i2++;
@@ -86,7 +88,6 @@ void draw_buffer(BufferCtx buffer){
         i2++;
     }
     out[(terminal.rows * terminal.cols) - 1] = '\0';
-     
     printf("\x1b[H%s",out);
     fflush(stdout);     
 }

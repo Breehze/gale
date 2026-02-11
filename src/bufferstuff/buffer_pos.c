@@ -70,7 +70,7 @@ void jump_next_word(BufferCtx * buff,int step){
     }
     buff->buff_pos =(i >= buff->mem_filled) ? buff->mem_filled - 1 : i;
     
-    if(slice > buff->view.end){
+    if(locate_slice(buff->buff_pos,*buff) > buff->view.end){
         buff->view.start += 1;
     }
 };
