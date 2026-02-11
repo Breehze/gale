@@ -32,11 +32,10 @@ void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar *
         combo_buff_index = 0;
     }
         
-    update_view_end(buff, *terminal);
     if(view_start_old != buff->view.start || view_end_old != buff->view.end){
         draw_buffer(*buff);   
     }
-    
+
     if(status_bar){
         SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
         SBAR_draw(*status_bar);
@@ -57,7 +56,7 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             break;
         case 127:
             remove_from_buffer(buff);
-            update_view_end(buff, terminal);
+            update_view_end(0,buff, terminal);
             break;
         case '\n':
             insert_new_line(buff,terminal);
@@ -98,7 +97,8 @@ int main(int argc, char **argv){
     terminal.rows -= 1;
     
     build_buffer(&buff,argv[1]); 
-    update_view_end(&buff, terminal);
+    //printf("%s",buff.mem);
+    update_view_end(0,&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);
     

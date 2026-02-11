@@ -53,20 +53,26 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
     return 0;
 }
 
-
-void update_view_end(BufferCtx* buffer,TermCtx terminal){
+void update_view_end(int vert_direction,BufferCtx* buffer, TermCtx terminal){
+    //vert_direction 0-down 1-up
     int lines_loaded = 0;
     int i = buffer->view.start;
+    
     while(lines_loaded < terminal.rows && i < buffer->slices_mem_filled){
-        int slice_lines = (buffer->slices[i].len+terminal.cols) / terminal.cols;
-        if(lines_loaded + slice_lines  > terminal.rows){
-            break;
+        int len = buffer->slices[i].len;
+        int slice_lines = len == 0 ? 1 : (len + terminal.cols - 1) / terminal.cols;
+        
+        if(lines_loaded + slice_lines > terminal.rows){
+            if (!vert_direction){ 
+                buffer->view.start += slice_lines-1;
+            }
+            else { break;}
         }
         
         lines_loaded += slice_lines; 
         i++;
     }
-    buffer->view.end = i-1;
+    buffer->view.end = i - 1;
 }
 
 
@@ -127,7 +133,7 @@ void insert_new_line(BufferCtx * buffer,TermCtx terminal){
         buffer->view.start++;
     }
 
-    update_view_end(buffer, terminal);
+    update_view_end(0,buffer, terminal);
 }
 
 void remove_from_buffer(BufferCtx * buffer){
