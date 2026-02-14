@@ -7,6 +7,7 @@
 typedef struct{
     BufferCtx * buff;
     TermCtx * term;
+    Mode * mode;
 }WrappedInput;
 
 typedef int * Error ;

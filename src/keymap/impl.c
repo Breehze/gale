@@ -49,3 +49,10 @@ void MOV_CURSOR_PREVIOUS_WORD(Inputs inputs, Error error){
 void EXIT(Inputs inputs,Error error){
     exit(0);
 }
+
+void INSERT_MODE(Inputs inputs,Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    TermCtx * term = ((WrappedInput *)inputs)->term;
+    Mode * mode = ((WrappedInput*)inputs)->mode;
+    *mode = INSERT;
+}

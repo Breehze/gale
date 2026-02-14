@@ -21,9 +21,9 @@ void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar *
     int view_end_old = buff->view.end;
     
     handler handler = call0(sequence);
-    WrappedInput handler_input = (WrappedInput){.buff = buff,.term = terminal};
+    WrappedInput handler_input = (WrappedInput){.buff = buff,.term = terminal,.mode = &mode};
     
-    if(handler){
+    if(handler){    
         handler(&handler_input,NULL);
     }   
 
@@ -39,6 +39,10 @@ void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar *
     if(status_bar){
         SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
         SBAR_draw(*status_bar);
+    }
+
+    if(mode == INSERT){
+        change_cursor_to_line();
     }
     
     TermPos a = translate_buff_pos_relative(*buff,*terminal);
@@ -97,7 +101,6 @@ int main(int argc, char **argv){
     terminal.rows -= 1;
     
     build_buffer(&buff,argv[1]); 
-    //printf("%s",buff.mem);
     update_view_end(0,&buff, terminal);
     draw_buffer(buff);
     SBAR_draw(bar);
@@ -106,19 +109,17 @@ int main(int argc, char **argv){
     for(;;){
         int ready = select(STDIN_FILENO + 1, &descriptors, NULL, NULL, NULL);
         
-        if(!ready){
-            continue;
-        }
+        if(!ready){ continue; }
 
         char c;
         if (read(STDIN_FILENO, &c, 1) == 1) {
-            combo_buff[combo_buff_index++] = c;
             switch (mode) {
                 case NORMAL:
-                    normal_mode(combo_buff,&buff,&terminal,&bar);
+                    combo_buff[combo_buff_index++] = c;
+                    normal_mode(combo_buff,&buff,&terminal,NULL);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,terminal,&bar);
+                    insert_mode(c,&buff,terminal,NULL);
                     break;
             }
         }

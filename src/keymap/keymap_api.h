@@ -24,5 +24,6 @@ void MOV_CURSOR_PREVIOUS_WORD(Inputs,Error);
 
 void EXIT(Inputs inputs,Error error);
 
+void INSERT_MODE(Inputs inputs,Error error);
 
 #endif
