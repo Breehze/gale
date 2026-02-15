@@ -4,6 +4,7 @@
 #include "../includes/common_keymap.h"
 
 handler call0(char*);
+handler call1(char*);
 
 handler call0(char * switcheroo){
    update_nest_count(0);
@@ -16,6 +17,14 @@ handler call0(char * switcheroo){
        case 'b': return &MOV_CURSOR_PREVIOUS_WORD;
        case 'q': return &EXIT;
        case 'i': return &INSERT_MODE;
+       case ':': return call1(switcheroo);
+       default: return NULL;
+   }
+}
+handler call1(char * switcheroo){
+   update_nest_count(1);
+   switch(switcheroo[1]){
+       case 'w': return &SAVE_BUFFER;
        default: return NULL;
    }
 }

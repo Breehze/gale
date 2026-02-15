@@ -116,10 +116,10 @@ int main(int argc, char **argv){
             switch (mode) {
                 case NORMAL:
                     combo_buff[combo_buff_index++] = c;
-                    normal_mode(combo_buff,&buff,&terminal,NULL);
+                    normal_mode(combo_buff,&buff,&terminal,&bar);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,terminal,NULL);
+                    insert_mode(c,&buff,terminal,&bar);
                     break;
             }
         }
