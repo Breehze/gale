@@ -10,7 +10,8 @@ keymap = {
     "w" : "MOV_CURSOR_NEXT_WORD",
     "b" : "MOV_CURSOR_PREVIOUS_WORD",
     "q" : "EXIT",
-    "i" : "INSERT_MODE"
+    "i" : "INSERT_MODE",
+    ":w" : "SAVE_BUFFER"
 }
 
 

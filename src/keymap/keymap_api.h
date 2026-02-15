@@ -26,4 +26,6 @@ void EXIT(Inputs inputs,Error error);
 
 void INSERT_MODE(Inputs inputs,Error error);
 
+void SAVE_BUFFER(Inputs inputs,Error error);
+
 #endif
