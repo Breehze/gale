@@ -15,15 +15,15 @@ handler call0(char * switcheroo){
        case 'h': return &MOV_CURSOR_LEFT;
        case 'w': return &MOV_CURSOR_NEXT_WORD;
        case 'b': return &MOV_CURSOR_PREVIOUS_WORD;
-       case 'q': return &EXIT;
-       case 'i': return &INSERT_MODE;
        case ':': return call1(switcheroo);
+       case 'i': return &INSERT_MODE;
        default: return NULL;
    }
 }
 handler call1(char * switcheroo){
    update_nest_count(1);
    switch(switcheroo[1]){
+       case 'q': return &EXIT;
        case 'w': return &SAVE_BUFFER;
        default: return NULL;
    }

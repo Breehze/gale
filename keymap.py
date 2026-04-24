@@ -9,7 +9,7 @@ keymap = {
     "h" : "MOV_CURSOR_LEFT",
     "w" : "MOV_CURSOR_NEXT_WORD",
     "b" : "MOV_CURSOR_PREVIOUS_WORD",
-    "q" : "EXIT",
+    ":q" : "EXIT",
     "i" : "INSERT_MODE",
     ":w" : "SAVE_BUFFER"
 }
