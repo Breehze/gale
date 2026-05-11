@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
+#include <stdlib.h>
 
 #include "../includes/types.h"
 #include "../bufferstuff/utils.h"
@@ -59,11 +60,15 @@ void change_cursor_to_block(void){
     fflush(stdout);
 }
 
+void reset_terminal() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+}
 
 TermCtx terminal_setup(void){
     get_term_size(&terminal);
     clear_screen();
     enable_raw_mode();
+    atexit(reset_terminal);
     return terminal;
 }
 
