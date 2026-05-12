@@ -45,5 +45,13 @@ typedef struct {
     Mode mode;
 }StatusBar;
 
+typedef struct{
+    char * frame_buffer;
+    size_t frame_buffer_size;
+    TermCtx terminal;
+    int redraw;
+    int margin_left;
+}RenderCtx;
+
 #endif
 
