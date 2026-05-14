@@ -26,6 +26,13 @@ typedef struct{
     int end;
 }BufferView;
 
+typedef struct{
+    int left;
+    int right;
+    int top;
+    int bottom;
+}Margin;
+
 typedef struct {
     char fpath[100];
     char * mem;
@@ -36,6 +43,7 @@ typedef struct {
     size_t slices_mem_filled;
     Slice *slices;
     BufferView view;
+    TermCtx logical_terminal;
 }BufferCtx;
 
 typedef struct {
@@ -49,8 +57,8 @@ typedef struct{
     char * frame_buffer;
     size_t frame_buffer_size;
     TermCtx terminal;
+    Margin margin;
     int redraw;
-    int margin_left;
 }RenderCtx;
 
 #endif

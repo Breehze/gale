@@ -17,6 +17,10 @@ void change_cursor_to_block(void);
 
 TermCtx terminal_setup(void);
 
+TermCtx calculate_content_size(RenderCtx *render_ctx);
+
+int calculate_line_margin(BufferCtx * buffer);
+
 RenderCtx * init_render_ctx(TermCtx terminal);
 
 void draw_buffer(BufferCtx * buffer, RenderCtx * render_ctx);

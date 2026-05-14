@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
@@ -46,6 +45,8 @@ void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx,StatusB
     }
     
     TermPos a = translate_buff_pos_relative(*buff,render_ctx->terminal);
+    a.x += render_ctx->margin.left;
+    a.y += render_ctx->margin.top;
     move_cursor(a);
 
 }
@@ -60,10 +61,10 @@ void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx,StatusBar * statu
             break;
         case 127:
             remove_from_buffer(buff);
-            update_view_end(0,buff,render_ctx->terminal);
+            update_view_end(0,buff);
             break;
         case '\n':
-            insert_new_line(buff,render_ctx->terminal);
+            insert_new_line(buff);
             break;
         case 9:
             for(int i = 0;i < 4;i++){
@@ -80,6 +81,8 @@ void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx,StatusBar * statu
         SBAR_draw(*status_bar);
     }
     a = translate_buff_pos_relative(*buff,render_ctx->terminal);
+    a.x += render_ctx->margin.left;
+    a.y += render_ctx->margin.top;
     move_cursor(a);
 }
 
@@ -91,17 +94,19 @@ int main(int argc, char **argv){
     FD_SET(STDIN_FILENO, &descriptors);
 
     BufferCtx buff;
-    RenderCtx *render_ctx; 
-    
+    RenderCtx *render_ctx;
+
     TermCtx terminal = terminal_setup();
     render_ctx = init_render_ctx(terminal);
 
-    
-    build_buffer(&buff,argv[1]); 
-    update_view_end(0,&buff, terminal);
+    build_buffer(&buff,argv[1]);
+    render_ctx->margin.left = calculate_line_margin(&buff) + 1;
+    render_ctx->margin.bottom = 1;
+    update_logical_terminal(&buff, calculate_content_size(render_ctx));
+    update_view_end(0, &buff);
     render_frame(&buff,render_ctx);
     
-    reset_cursor();
+    move_cursor((TermPos){.x = 1 + render_ctx->margin.left ,.y = 1 + render_ctx->margin.right});
     for(;;){
         int ready = select(STDIN_FILENO + 1, &descriptors, NULL, NULL, NULL);
         
