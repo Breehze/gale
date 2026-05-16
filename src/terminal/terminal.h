@@ -27,8 +27,6 @@ void draw_buffer(BufferCtx * buffer, RenderCtx * render_ctx);
 
 void render_frame(BufferCtx *buffer, RenderCtx *render_ctx);
 
-void SBAR_draw(StatusBar bar);
-
 void SBAR_update(StatusBar * bar,TermPos buffer_pos,char * open_fname,Mode mode);
 
 #endif 

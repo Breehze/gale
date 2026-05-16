@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
@@ -15,7 +14,7 @@ Mode mode = NORMAL;
 char combo_buff[100] = {0};
 int combo_buff_index = 0;
 
-void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx,StatusBar * status_bar){
+void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx){
     int view_start_old = buff->view.start;
     int view_end_old = buff->view.end;
     
@@ -35,9 +34,9 @@ void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx,StatusB
         render_frame(buff, render_ctx);
     }
 
-    if(status_bar){
-        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        SBAR_draw(*status_bar);
+    if(render_ctx->status_bar){
+        SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+        render_frame(buff, render_ctx);
     }
 
     if(mode == INSERT){
@@ -52,7 +51,7 @@ void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx,StatusB
 }
 
 
-void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx,StatusBar * status_bar){
+void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx){
     TermPos a;
     switch (c) {
         case '\e':
@@ -76,9 +75,9 @@ void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx,StatusBar * statu
             break;
     }
     render_frame(buff,render_ctx);
-    if(status_bar){
-        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        SBAR_draw(*status_bar);
+    if(render_ctx->status_bar){
+        SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+        render_frame(buff, render_ctx);
     }
     a = translate_buff_pos_relative(*buff,render_ctx->terminal);
     a.x += render_ctx->margin.left;
@@ -95,15 +94,23 @@ int main(int argc, char **argv){
 
     BufferCtx buff;
     RenderCtx *render_ctx;
-
+    
+    
     TermCtx terminal = terminal_setup();
     render_ctx = init_render_ctx(terminal);
 
     build_buffer(&buff,argv[1]);
+    
+
     render_ctx->margin.left = calculate_line_margin(&buff) + 1;
     render_ctx->margin.bottom = 1;
     update_logical_terminal(&buff, calculate_content_size(render_ctx));
     update_view_end(0, &buff);
+    
+    StatusBar bar;
+    render_ctx->status_bar = &bar;
+    SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(buff),buff.fpath, NORMAL);
+    
     render_frame(&buff,render_ctx);
     
     move_cursor((TermPos){.x = 1 + render_ctx->margin.left ,.y = 1 + render_ctx->margin.right});
@@ -117,10 +124,10 @@ int main(int argc, char **argv){
             switch (mode) {
                 case NORMAL:
                     combo_buff[combo_buff_index++] = c;
-                    normal_mode(combo_buff,&buff,render_ctx,NULL);
+                    normal_mode(combo_buff,&buff,render_ctx);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,render_ctx,NULL);
+                    insert_mode(c,&buff,render_ctx);
                     break;
             }
         }

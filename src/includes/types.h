@@ -59,6 +59,7 @@ typedef struct{
     TermCtx terminal;
     Margin margin;
     int redraw;
+    StatusBar * status_bar;
 }RenderCtx;
 
 #endif
