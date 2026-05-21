@@ -124,7 +124,7 @@ void render_status_bar(RenderCtx * render_ctx){
     }
     sprintf(cursor_pos, "%d:%d", render_ctx->status_bar->buffer_pos.y, render_ctx->status_bar->buffer_pos.x);
     
-    if(strlen(cursor_pos) + 8 + strlen(render_ctx->status_bar->open_fname) >  render_ctx->terminal.cols / 4 ){
+    if(strlen(cursor_pos) + 8 + strlen(render_ctx->status_bar->open_fname) >  render_ctx->terminal.cols * 3/4 ){
         return;
     }
     strncpy(&render_ctx->frame_buffer[r_row_start + 10],render_ctx->status_bar->open_fname,strlen(render_ctx->status_bar->open_fname));
