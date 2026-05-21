@@ -14,6 +14,7 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
         .slices_mem_len = 1000,
         .slices = (Slice *)calloc(1000,sizeof(Slice)),
         .buff_pos = 0,
+        .col_offset = 0,
     };
     
     FILE * file = fopen(fpath,"r");
@@ -61,22 +62,26 @@ void update_view_end(int vert_direction,BufferCtx* buffer){
     //vert_direction 0-down 1-up
     int lines_loaded = 0;
     int i = buffer->view.start;
-    
+
     while(lines_loaded < buffer->logical_terminal.rows && i < buffer->slices_mem_filled){
-        int len = buffer->slices[i].len;
-        int slice_lines = len == 0 ? 1 : (len + buffer->logical_terminal.cols - 1) / buffer->logical_terminal.cols;
-        
-        if(lines_loaded + slice_lines > buffer->logical_terminal.rows){
-            if (!vert_direction){ 
-                buffer->view.start += slice_lines-1;
-            }
-            else { break;}
-        }
-        
-        lines_loaded += slice_lines; 
+        lines_loaded++;
         i++;
     }
     buffer->view.end = i - 1;
+}
+
+void update_col_offset(BufferCtx* buffer){
+    int slice = locate_slice(buffer->buff_pos, *buffer);
+    int slice_start = get_slice_start(slice, *buffer);
+    int col_in_line = buffer->buff_pos - slice_start;
+
+    if(col_in_line < buffer->col_offset){
+        buffer->col_offset = col_in_line;
+    }
+
+    if(col_in_line >= buffer->col_offset + buffer->logical_terminal.cols){
+        buffer->col_offset = col_in_line - buffer->logical_terminal.cols + 1;
+    }
 }
 
 

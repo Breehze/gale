@@ -10,6 +10,8 @@ void update_logical_terminal(BufferCtx *buffer,TermCtx terminal);
 // Buffer position modifications
 void update_view_end(int direction,BufferCtx* buffer);
 
+void update_col_offset(BufferCtx* buffer);
+
 void move_buff_pos_up(BufferCtx* buffer,int step);
 
 void move_buff_pos_down(BufferCtx* buffer,int step);

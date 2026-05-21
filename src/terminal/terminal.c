@@ -61,11 +61,15 @@ void change_cursor_to_block(void){
 }
 
 void reset_terminal() {
+    printf("\x1b[?1049l");  
+    fflush(stdout);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
 TermCtx terminal_setup(void){
     get_term_size(&terminal);
+    printf("\x1b[?1049h");  
+    fflush(stdout);
     clear_screen();
     enable_raw_mode();
     atexit(reset_terminal);

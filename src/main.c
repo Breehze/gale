@@ -31,18 +31,20 @@ void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx){
     }
         
     if(view_start_old != buff->view.start || view_end_old != buff->view.end){
-        render_frame(buff, render_ctx);
+        //render_frame(buff, render_ctx);
     }
 
     if(render_ctx->status_bar){
         SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        render_frame(buff, render_ctx);
+        //render_frame(buff, render_ctx);
     }
-
+    render_frame(buff, render_ctx);
     if(mode == INSERT){
         change_cursor_to_line();
     }
-    
+
+    update_col_offset(buff);  
+
     TermPos a = translate_buff_pos_relative(*buff,render_ctx->terminal);
     a.x += render_ctx->margin.left;
     a.y += render_ctx->margin.top;
@@ -74,11 +76,15 @@ void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx){
             insert_into_buffer(c,buff);
             break;
     }
-    render_frame(buff,render_ctx);
+
     if(render_ctx->status_bar){
         SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        render_frame(buff, render_ctx);
     }
+
+    render_frame(buff,render_ctx);
+
+    update_col_offset(buff);  
+
     a = translate_buff_pos_relative(*buff,render_ctx->terminal);
     a.x += render_ctx->margin.left;
     a.y += render_ctx->margin.top;

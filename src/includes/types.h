@@ -44,6 +44,7 @@ typedef struct {
     Slice *slices;
     BufferView view;
     TermCtx logical_terminal;
+    int col_offset;  // Horizontal scroll offset
 }BufferCtx;
 
 typedef struct {

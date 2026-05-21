@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "terminal.h"
 
@@ -52,30 +53,29 @@ int translate_row2absolute(int row,RenderCtx * render_ctx){
 void draw_buffer(BufferCtx *buffer, RenderCtx *render_ctx){
     int render_row = 0;
 
-    for(int buffer_line_idx = buffer->view.start; buffer_line_idx <= buffer->view.end;buffer_line_idx++){
-        int slice_start = get_slice_start(buffer_line_idx, *buffer);
-        int render_line_idx = translate_row2absolute(render_row, render_ctx) + render_ctx->margin.left;
+    for(int buffer_line_idx = buffer->view.start; buffer_line_idx <= buffer->view.end; buffer_line_idx++){
+        if(render_row >= render_ctx->terminal.rows - render_ctx->margin.bottom){
+            break;
+        }
 
-        for(int buffer_cpy_pos = slice_start;buffer_cpy_pos < slice_start + buffer->logical_terminal.cols ;buffer_cpy_pos++){
-            if(render_line_idx >= render_ctx->frame_buffer_size - 1){
+        int slice_start = get_slice_start(buffer_line_idx, *buffer);
+        int line_len = buffer->slices[buffer_line_idx].len - 1;
+        int row_start = translate_row2absolute(render_row, render_ctx);
+        int render_line_idx = row_start + render_ctx->margin.left;
+
+        for(int col = 0; col < buffer->logical_terminal.cols; col++){
+            int buffer_pos = slice_start + buffer->col_offset + col;
+            if(buffer_pos < slice_start + line_len){
+                render_ctx->frame_buffer[render_line_idx++] = buffer->mem[buffer_pos];
+            } else {
                 break;
             }
-            if(buffer_cpy_pos < slice_start + buffer->slices[buffer_line_idx].len - 1){
-                render_ctx->frame_buffer[render_line_idx] = buffer->mem[buffer_cpy_pos];
-                render_line_idx++;
-            }else{
-                render_ctx->frame_buffer[render_line_idx] = ' ';
-                render_line_idx++;
-            }
-        }
-        
-        if(render_line_idx >= render_ctx->frame_buffer_size - 1){
-            break;
         }
 
         render_row++;
     }
 }
+
 
 void render_lnumbers(BufferCtx *buffer, RenderCtx * render_ctx){
     char tmp_buff[21] = {0};
@@ -83,15 +83,17 @@ void render_lnumbers(BufferCtx *buffer, RenderCtx * render_ctx){
     int margin = calculate_line_margin(buffer);
     for(int slice = buffer->view.start; slice <= buffer->view.end; slice++){
         int row_start = translate_row2absolute(render_row, render_ctx);
-        snprintf(tmp_buff, 20, "%d",slice + 1);
+        snprintf(tmp_buff, 20, "%d", slice + 1);
 
-        int len = strlen(tmp_buff) - 1;
-        for(int i = len; i >= 0; i--){
-            render_ctx->frame_buffer[row_start + (margin - i -1 )] = tmp_buff[len - i];
+        int str_len = strlen(tmp_buff) - 1;
+        for(int i = str_len; i >= 0; i--){
+            render_ctx->frame_buffer[row_start + (margin - i - 1)] = tmp_buff[str_len - i];
         }
-        render_row++;
+
+        render_row++;  
     }
 };
+
 
 void set_newlines(RenderCtx *render_ctx){
     for(int row = 0;row < render_ctx->terminal.rows;row++){
@@ -102,6 +104,7 @@ void set_newlines(RenderCtx *render_ctx){
         render_ctx->frame_buffer[row_start + render_ctx->terminal.cols] = '\n';
     }
 }   
+
 
 void render_status_bar(RenderCtx * render_ctx){
     if(!render_ctx->status_bar || !(render_ctx->margin.bottom > 0)){
@@ -128,45 +131,13 @@ void render_status_bar(RenderCtx * render_ctx){
     strncpy(&render_ctx->frame_buffer[r_row_start + (render_ctx->terminal.cols) - 15],cursor_pos,strlen(cursor_pos));
 }
 
-//void draw_buffer(BufferCtx *buffer, RenderCtx *render_ctx){
-//    memset(render_ctx->frame_buffer, ' ', render_ctx->frame_buffer_size);
-//    int i2 = 0;
-//
-//    for(int i = buffer->view.start; i <= buffer->view.end; i++){
-//        int slice_start = get_slice_start(i, *buffer);
-//        int rows_taken = (buffer->slices[i].len / buffer->logical_terminal.cols) + 1;
-//
-//        for(int j = slice_start; j < slice_start + (buffer->logical_terminal.cols * rows_taken); j++){
-//            if(i2 >= render_ctx->frame_buffer_size - 1){
-//                break;
-//            }
-//
-//            if(j < slice_start + buffer->slices[i].len - 1){
-//                render_ctx->frame_buffer[i2] = buffer->mem[j];
-//                i2++;
-//            }else{
-//                render_ctx->frame_buffer[i2] = ' ';
-//                i2++;
-//            }
-//        }
-//
-//        if(i2 >= render_ctx->frame_buffer_size - 1){
-//            break;
-//        }
-//
-//        render_ctx->frame_buffer[i2] = '\n';
-//        i2++;
-//    }
-//
-//    render_ctx->frame_buffer[i2] = '\0';
-//}
-
 
 void print_with_colors(RenderCtx *render_ctx) {
-    printf("\x1b[H");  // Home cursor
-
+    printf("\x1b[?2026h");      
+    printf("\x1b[H");  
     // Print row by row, applying colors to each section
     for (int row = 0; row < render_ctx->terminal.rows; row++) {
+
         int row_start = row * render_ctx->terminal.cols;
 
         // Last row is status bar (if margin.bottom > 0)
@@ -209,15 +180,17 @@ void print_with_colors(RenderCtx *render_ctx) {
             printf("%.*s", content_len, &render_ctx->frame_buffer[content_start]);
         }
     }
+    printf("\x1b[?2026l");  // End synchronized update
     fflush(stdout);
 }
 
 void render_frame(BufferCtx *buffer, RenderCtx *render_ctx){
     memset(render_ctx->frame_buffer,' ', render_ctx->frame_buffer_size);
 
-    draw_buffer(buffer,render_ctx);
-    render_lnumbers(buffer,render_ctx);
+    draw_buffer(buffer, render_ctx);
+    render_lnumbers(buffer, render_ctx);
     render_status_bar(render_ctx);
 
     print_with_colors(render_ctx);
+    fflush(stdout);
 }
