@@ -176,6 +176,9 @@ void print_with_colors(RenderCtx *render_ctx) {
             printf("\x1b[33m");  // Yellow
             printf("%.*s", 15, &render_ctx->frame_buffer[row_start + render_ctx->terminal.cols - 15]);
             printf("\x1b[0m");  // Reset
+        } else if (row == render_ctx->terminal.rows - 1) {
+            // Last row (command line) - no coloring
+            printf("%.*s", render_ctx->terminal.cols, &render_ctx->frame_buffer[row_start]);
         } else {
             // Line numbers region (first margin.left columns)
             if (render_ctx->margin.left > 0) {
