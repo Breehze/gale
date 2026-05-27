@@ -38,7 +38,7 @@ void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx){
         SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
         //render_frame(buff, render_ctx);
     }
-    render_frame(buff, render_ctx);
+    render_frame(buff,combo_buff,render_ctx);
     if(mode == INSERT){
         change_cursor_to_line();
     }
@@ -81,7 +81,7 @@ void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx){
         SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
     }
 
-    render_frame(buff,render_ctx);
+    render_frame(buff,combo_buff,render_ctx);
 
     update_col_offset(buff);  
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv){
     
 
     render_ctx->margin.left = calculate_line_margin(&buff) + 1;
-    render_ctx->margin.bottom = 1;
+    render_ctx->margin.bottom = 2;
     update_logical_terminal(&buff, calculate_content_size(render_ctx));
     update_view_end(0, &buff);
     
@@ -117,7 +117,7 @@ int main(int argc, char **argv){
     render_ctx->status_bar = &bar;
     SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(buff),buff.fpath, NORMAL);
     
-    render_frame(&buff,render_ctx);
+    render_frame(&buff,combo_buff,render_ctx);
     
     move_cursor((TermPos){.x = 1 + render_ctx->margin.left ,.y = 1 + render_ctx->margin.right});
     for(;;){

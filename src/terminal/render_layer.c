@@ -106,7 +106,7 @@ void set_newlines(RenderCtx *render_ctx){
 }   
 
 
-void render_status_bar(RenderCtx * render_ctx){
+void render_status_bar(RenderCtx * render_ctx, int render_at_y){
     if(!render_ctx->status_bar || !(render_ctx->margin.bottom > 0)){
         return;
     }
@@ -115,7 +115,7 @@ void render_status_bar(RenderCtx * render_ctx){
     char insert_mode[] = " INSERT ";
 
 
-    int render_row = render_ctx->terminal.rows - 1;
+    int render_row = render_at_y - 1;
     int r_row_start = translate_row2absolute(render_row,render_ctx);
     if(render_ctx->status_bar->mode == NORMAL){   
         strncpy(&render_ctx->frame_buffer[r_row_start],normal_mode,8);
@@ -131,6 +131,16 @@ void render_status_bar(RenderCtx * render_ctx){
     strncpy(&render_ctx->frame_buffer[r_row_start + (render_ctx->terminal.cols) - 15],cursor_pos,strlen(cursor_pos));
 }
 
+void render_commend_line(RenderCtx * render_ctx,char * command,int render_at_y){
+    if(!command || command[0] != ':'){
+        return;
+    }   
+    int render_row = render_at_y - 1;
+    int r_row_start = translate_row2absolute(render_row,render_ctx);
+
+    strncpy(&render_ctx->frame_buffer[r_row_start],command,strlen(command));
+}
+
 
 void print_with_colors(RenderCtx *render_ctx) {
     printf("\x1b[?2026h");      
@@ -141,7 +151,7 @@ void print_with_colors(RenderCtx *render_ctx) {
         int row_start = row * render_ctx->terminal.cols;
 
         // Last row is status bar (if margin.bottom > 0)
-        if (row == render_ctx->terminal.rows - 1 && render_ctx->margin.bottom > 0) {
+        if (row == render_ctx->terminal.rows - 2 && render_ctx->margin.bottom > 0) {
             // Status bar sections:
             // 0-7: Mode (purple bg)
             // 8-9: Space
@@ -184,12 +194,13 @@ void print_with_colors(RenderCtx *render_ctx) {
     fflush(stdout);
 }
 
-void render_frame(BufferCtx *buffer, RenderCtx *render_ctx){
+void render_frame(BufferCtx *buffer,char * command, RenderCtx *render_ctx){
     memset(render_ctx->frame_buffer,' ', render_ctx->frame_buffer_size);
 
     draw_buffer(buffer, render_ctx);
     render_lnumbers(buffer, render_ctx);
-    render_status_bar(render_ctx);
+    render_status_bar(render_ctx,render_ctx->terminal.rows-1);
+    render_commend_line(render_ctx,command,render_ctx->terminal.rows);
 
     print_with_colors(render_ctx);
     fflush(stdout);

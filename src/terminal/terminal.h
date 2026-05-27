@@ -25,7 +25,7 @@ RenderCtx * init_render_ctx(TermCtx terminal);
 
 void draw_buffer(BufferCtx * buffer, RenderCtx * render_ctx);
 
-void render_frame(BufferCtx *buffer, RenderCtx *render_ctx);
+void render_frame(BufferCtx *buffer,char *command, RenderCtx *render_ctx);
 
 void SBAR_update(StatusBar * bar,TermPos buffer_pos,char * open_fname,Mode mode);
 
