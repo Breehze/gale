@@ -14,6 +14,7 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
         .slices_mem_len = 1000,
         .slices = (Slice *)calloc(1000,sizeof(Slice)),
         .buff_pos = 0,
+        .col_offset = 0,
     };
     
     FILE * file = fopen(fpath,"r");
@@ -53,26 +54,34 @@ int build_buffer(BufferCtx* buffer,const char * fpath){
     return 0;
 }
 
-void update_view_end(int vert_direction,BufferCtx* buffer, TermCtx terminal){
+void update_logical_terminal(BufferCtx *buffer,TermCtx terminal){
+    buffer->logical_terminal = terminal;
+}
+
+void update_view_end(int vert_direction,BufferCtx* buffer){
     //vert_direction 0-down 1-up
     int lines_loaded = 0;
     int i = buffer->view.start;
-    
-    while(lines_loaded < terminal.rows && i < buffer->slices_mem_filled){
-        int len = buffer->slices[i].len;
-        int slice_lines = len == 0 ? 1 : (len + terminal.cols - 1) / terminal.cols;
-        
-        if(lines_loaded + slice_lines > terminal.rows){
-            if (!vert_direction){ 
-                buffer->view.start += slice_lines-1;
-            }
-            else { break;}
-        }
-        
-        lines_loaded += slice_lines; 
+
+    while(lines_loaded < buffer->logical_terminal.rows && i < buffer->slices_mem_filled){
+        lines_loaded++;
         i++;
     }
     buffer->view.end = i - 1;
+}
+
+void update_col_offset(BufferCtx* buffer){
+    int slice = locate_slice(buffer->buff_pos, *buffer);
+    int slice_start = get_slice_start(slice, *buffer);
+    int col_in_line = buffer->buff_pos - slice_start;
+
+    if(col_in_line < buffer->col_offset){
+        buffer->col_offset = col_in_line;
+    }
+
+    if(col_in_line >= buffer->col_offset + buffer->logical_terminal.cols){
+        buffer->col_offset = col_in_line - buffer->logical_terminal.cols + 1;
+    }
 }
 
 
@@ -97,7 +106,7 @@ void insert_into_buffer(char c,BufferCtx * buffer){
 }
 
 
-void insert_new_line(BufferCtx * buffer,TermCtx terminal){
+void insert_new_line(BufferCtx * buffer){
     if(buffer->slices_mem_filled + 1 > buffer->slices_mem_len){
         buffer->slices_mem_len *= 10;
         buffer->slices = (Slice *)realloc(buffer->slices,buffer->slices_mem_len);
@@ -129,11 +138,11 @@ void insert_new_line(BufferCtx * buffer,TermCtx terminal){
     buffer->slices_mem_filled += 1;
     curr_slice += 1;  
 
-    if(curr_slice > buffer->view.end && buffer->view.end >= terminal.rows-1) {
+    if(curr_slice > buffer->view.end && buffer->view.end >= buffer->logical_terminal.rows-1) {
         buffer->view.start++;
     }
 
-    update_view_end(0,buffer, terminal);
+    update_view_end(0,buffer);
 }
 
 void remove_from_buffer(BufferCtx * buffer){

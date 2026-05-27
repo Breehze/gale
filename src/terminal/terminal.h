@@ -17,9 +17,15 @@ void change_cursor_to_block(void);
 
 TermCtx terminal_setup(void);
 
-void draw_buffer(BufferCtx buffer);
+TermCtx calculate_content_size(RenderCtx *render_ctx);
 
-void SBAR_draw(StatusBar bar);
+int calculate_line_margin(BufferCtx * buffer);
+
+RenderCtx * init_render_ctx(TermCtx terminal);
+
+void draw_buffer(BufferCtx * buffer, RenderCtx * render_ctx);
+
+void render_frame(BufferCtx *buffer,char *command, RenderCtx *render_ctx);
 
 void SBAR_update(StatusBar * bar,TermPos buffer_pos,char * open_fname,Mode mode);
 

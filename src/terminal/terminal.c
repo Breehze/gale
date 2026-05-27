@@ -61,38 +61,17 @@ void change_cursor_to_block(void){
 }
 
 void reset_terminal() {
+    printf("\x1b[?1049l");  
+    fflush(stdout);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
 TermCtx terminal_setup(void){
     get_term_size(&terminal);
+    printf("\x1b[?1049h");  
+    fflush(stdout);
     clear_screen();
     enable_raw_mode();
     atexit(reset_terminal);
     return terminal;
-}
-
-void draw_buffer(BufferCtx buffer){
-    char out[100000] = {0};
-    memset(out,' ',100000);
-    int i2 = 0;
-    for(int i = buffer.view.start; i <= buffer.view.end;i++){
-        int slice_start = get_slice_start(i, buffer);
-        int rows_taken = (buffer.slices[i].len / terminal.cols)+1;
-        
-        for(int j = slice_start;j < slice_start + (terminal.cols * rows_taken);j++){
-            if(j < slice_start + buffer.slices[i].len-1){
-                out[i2]= buffer.mem[j];
-                i2++;
-            }else{
-                out[i2]= ' ';
-                i2++;
-            }
-        }
-        out[i2] = '\n';
-        i2++;
-    }
-    out[(terminal.rows * terminal.cols) - 1] = '\0';
-    printf("\x1b[H%s",out);
-    fflush(stdout);     
 }

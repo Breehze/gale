@@ -1,7 +1,5 @@
 #include <assert.h>
 #include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
@@ -16,12 +14,12 @@ Mode mode = NORMAL;
 char combo_buff[100] = {0};
 int combo_buff_index = 0;
 
-void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar * status_bar){
+void normal_mode(char * sequence, BufferCtx * buff,RenderCtx *render_ctx){
     int view_start_old = buff->view.start;
     int view_end_old = buff->view.end;
     
     handler handler = call0(sequence);
-    WrappedInput handler_input = (WrappedInput){.buff = buff,.term = terminal,.mode = &mode};
+    WrappedInput handler_input = (WrappedInput){.buff = buff,.term = render_ctx->terminal,.mode = &mode};
     
     if(handler){    
         handler(&handler_input,NULL);
@@ -33,25 +31,29 @@ void normal_mode(char * sequence, BufferCtx * buff,TermCtx *terminal,StatusBar *
     }
         
     if(view_start_old != buff->view.start || view_end_old != buff->view.end){
-        draw_buffer(*buff);   
+        //render_frame(buff, render_ctx);
     }
 
-    if(status_bar){
-        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        SBAR_draw(*status_bar);
+    if(render_ctx->status_bar){
+        SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
+        //render_frame(buff, render_ctx);
     }
-
+    render_frame(buff,combo_buff,render_ctx);
     if(mode == INSERT){
         change_cursor_to_line();
     }
-    
-    TermPos a = translate_buff_pos_relative(*buff,*terminal);
+
+    update_col_offset(buff);  
+
+    TermPos a = translate_buff_pos_relative(*buff,render_ctx->terminal);
+    a.x += render_ctx->margin.left;
+    a.y += render_ctx->margin.top;
     move_cursor(a);
 
 }
 
 
-void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar){
+void insert_mode(char c,BufferCtx* buff,RenderCtx * render_ctx){
     TermPos a;
     switch (c) {
         case '\e':
@@ -60,10 +62,10 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             break;
         case 127:
             remove_from_buffer(buff);
-            update_view_end(0,buff, terminal);
+            update_view_end(0,buff);
             break;
         case '\n':
-            insert_new_line(buff,terminal);
+            insert_new_line(buff);
             break;
         case 9:
             for(int i = 0;i < 4;i++){
@@ -74,12 +76,18 @@ void insert_mode(char c,BufferCtx* buff,TermCtx terminal,StatusBar * status_bar)
             insert_into_buffer(c,buff);
             break;
     }
-    draw_buffer(*buff);
-    if(status_bar){
-        SBAR_update(status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
-        SBAR_draw(*status_bar);
+
+    if(render_ctx->status_bar){
+        SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(*buff),buff->fpath,mode);
     }
-    a = translate_buff_pos_relative(*buff,terminal);
+
+    render_frame(buff,combo_buff,render_ctx);
+
+    update_col_offset(buff);  
+
+    a = translate_buff_pos_relative(*buff,render_ctx->terminal);
+    a.x += render_ctx->margin.left;
+    a.y += render_ctx->margin.top;
     move_cursor(a);
 }
 
@@ -91,21 +99,27 @@ int main(int argc, char **argv){
     FD_SET(STDIN_FILENO, &descriptors);
 
     BufferCtx buff;
+    RenderCtx *render_ctx;
+    
+    
     TermCtx terminal = terminal_setup();
-    StatusBar bar = (StatusBar){
-        .mode = NORMAL,
-        .pos = (TermPos){.x = terminal.cols ,.y = terminal.rows},
-        .open_fname = buff.fpath,
-        .buffer_pos = (TermPos){.x = 1,.y = 1}
-    };
-    terminal.rows -= 1;
+    render_ctx = init_render_ctx(terminal);
+
+    build_buffer(&buff,argv[1]);
     
-    build_buffer(&buff,argv[1]); 
-    update_view_end(0,&buff, terminal);
-    draw_buffer(buff);
-    SBAR_draw(bar);
+
+    render_ctx->margin.left = calculate_line_margin(&buff) + 1;
+    render_ctx->margin.bottom = 2;
+    update_logical_terminal(&buff, calculate_content_size(render_ctx));
+    update_view_end(0, &buff);
     
-    reset_cursor();
+    StatusBar bar;
+    render_ctx->status_bar = &bar;
+    SBAR_update(render_ctx->status_bar,translate_buff_pos_absolute(buff),buff.fpath, NORMAL);
+    
+    render_frame(&buff,combo_buff,render_ctx);
+    
+    move_cursor((TermPos){.x = 1 + render_ctx->margin.left ,.y = 1 + render_ctx->margin.right});
     for(;;){
         int ready = select(STDIN_FILENO + 1, &descriptors, NULL, NULL, NULL);
         
@@ -116,10 +130,10 @@ int main(int argc, char **argv){
             switch (mode) {
                 case NORMAL:
                     combo_buff[combo_buff_index++] = c;
-                    normal_mode(combo_buff,&buff,&terminal,&bar);
+                    normal_mode(combo_buff,&buff,render_ctx);
                     break;
                 case INSERT:
-                    insert_mode(c,&buff,terminal,&bar);
+                    insert_mode(c,&buff,render_ctx);
                     break;
             }
         }

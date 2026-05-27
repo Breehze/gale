@@ -6,7 +6,7 @@
 
 typedef struct{
     BufferCtx * buff;
-    TermCtx * term;
+    TermCtx  term;
     Mode * mode;
 }WrappedInput;
 

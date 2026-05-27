@@ -5,8 +5,12 @@
 
 int build_buffer(BufferCtx* buffer,const char * fpath);
 
+void update_logical_terminal(BufferCtx *buffer,TermCtx terminal);
+
 // Buffer position modifications
-void update_view_end(int direction,BufferCtx* buffer,TermCtx terminal);
+void update_view_end(int direction,BufferCtx* buffer);
+
+void update_col_offset(BufferCtx* buffer);
 
 void move_buff_pos_up(BufferCtx* buffer,int step);
 
@@ -23,7 +27,7 @@ void jump_previous_word(BufferCtx * buff,int step);
 // Buffer content modifications
 void insert_into_buffer(char c,BufferCtx * buffer);
 
-void insert_new_line(BufferCtx * buffer,TermCtx terminal);
+void insert_new_line(BufferCtx * buffer);
 
 void remove_from_buffer(BufferCtx * buffer);
 

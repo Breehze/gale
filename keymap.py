@@ -1,5 +1,5 @@
 from pprint import pprint
-from src.keymap.generator import generate_keymap
+from src.keymap.generator import generate_keymap,nested_insert
 from typing import Tuple
 
 keymap = {
@@ -8,10 +8,10 @@ keymap = {
     "j" : "MOV_CURSOR_DOWN",
     "h" : "MOV_CURSOR_LEFT",
     "w" : "MOV_CURSOR_NEXT_WORD",
-    "b" : "MOV_CURSOR_PREVIOUS_WORD",
-    ":q" : "EXIT",
+    "bd" : "MOV_CURSOR_PREVIOUS_WORD",
+    ":q\n" : "EXIT",
     "i" : "INSERT_MODE",
-    ":w" : "SAVE_BUFFER"
+    ":w\n" : "SAVE_BUFFER"
 }
 
 
