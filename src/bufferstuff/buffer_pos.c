@@ -57,6 +57,13 @@ void move_buff_pos_right(BufferCtx* buffer, int step){
 }
 
 
+void move_buff_pos_eol(BufferCtx* buffer){
+    int slice = locate_slice(buffer->buff_pos,*buffer);
+    int slice_end = get_slice_start(slice,*buffer) + buffer->slices[slice].len-1;
+    buffer->buff_pos = slice_end;
+}
+
+
 void jump_next_word(BufferCtx * buff,int step){
     //step not implemented
     int slice = locate_slice(buff->buff_pos,*buff);
@@ -74,6 +81,48 @@ void jump_next_word(BufferCtx * buff,int step){
         buff->view.start += 1;
     }
 };
+
+
+void center_around_cursor_v(BufferCtx *buff){
+    int cursor_line = locate_slice(buff->buff_pos, *buff);
+    int half_screen = buff->logical_terminal.rows / 2;
+
+    buff->view.start = cursor_line - half_screen;
+
+    if(buff->view.start < 0){
+        buff->view.start = 0;
+    }
+
+    int max_start = buff->slices_mem_filled - buff->logical_terminal.rows;
+    if(max_start < 0) max_start = 0;
+    if(buff->view.start > max_start){
+        buff->view.start = max_start;
+    }
+
+    update_view_end(0, buff);
+}
+
+
+void center_around_cursor_h(BufferCtx *buff){
+    int slice = locate_slice(buff->buff_pos, *buff);
+    int slice_start = get_slice_start(slice, *buff);
+    int col_in_line = buff->buff_pos - slice_start;
+    int half_cols = buff->logical_terminal.cols / 2;
+
+    buff->col_offset = col_in_line - half_cols;
+
+    if(buff->col_offset < 0){
+        buff->col_offset = 0;
+    }
+
+    int line_len = buff->slices[slice].len - 1;
+    int max_offset = line_len - buff->logical_terminal.cols;
+    if(max_offset < 0) max_offset = 0;
+    if(buff->col_offset > max_offset){
+        buff->col_offset = max_offset;
+    }
+}
+
 
 void jump_previous_word(BufferCtx * buff,int step){
     //step not implemented 

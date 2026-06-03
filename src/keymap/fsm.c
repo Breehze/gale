@@ -3,7 +3,8 @@
 #include "keymap_api.h"
 #include "../includes/common_keymap.h"
 
-handler call7002c394(char*);
+handler call82fc8dab(char*);
+handler call5fe43ad3(char*);
 handler call269d9c8e(char*);
 handler call5df455b1(char*);
 handler calleaf3f44a(char*);
@@ -16,16 +17,26 @@ handler call0(char * switcheroo){
        case 'j': return &MOV_CURSOR_DOWN;
        case 'h': return &MOV_CURSOR_LEFT;
        case 'w': return &MOV_CURSOR_NEXT_WORD;
-       case 'b': return call7002c394(switcheroo);
+       case '$': return &MOV_CURSOR_EOL;
+       case 'b': return &MOV_CURSOR_PREVIOUS_WORD;
+       case 't': return call82fc8dab(switcheroo);
+       case 'z': return call5fe43ad3(switcheroo);
        case ':': return call269d9c8e(switcheroo);
        case 'i': return &INSERT_MODE;
        default: return NULL;
    }
 }
-handler call7002c394(char * switcheroo){
+handler call82fc8dab(char * switcheroo){
    update_nest_count(1);
    switch(switcheroo[1]){
-       case 'd': return &MOV_CURSOR_PREVIOUS_WORD;
+       case 't': return &CENTER_VIEW_AROUND_CURSOR_H;
+       default: return NULL;
+   }
+}
+handler call5fe43ad3(char * switcheroo){
+   update_nest_count(1);
+   switch(switcheroo[1]){
+       case 'z': return &CENTER_VIEW_AROUND_CURSOR_V;
        default: return NULL;
    }
 }

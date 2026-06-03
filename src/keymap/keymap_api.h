@@ -22,6 +22,12 @@ void MOV_CURSOR_NEXT_WORD(Inputs,Error);
 
 void MOV_CURSOR_PREVIOUS_WORD(Inputs,Error);
 
+void MOV_CURSOR_EOL(Inputs, Error);
+
+void CENTER_VIEW_AROUND_CURSOR_H(Inputs inputs, Error error); 
+
+void CENTER_VIEW_AROUND_CURSOR_V(Inputs inputs, Error error); 
+
 void EXIT(Inputs inputs,Error error);
 
 void INSERT_MODE(Inputs inputs,Error error);

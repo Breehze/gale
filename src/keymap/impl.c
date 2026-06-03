@@ -40,6 +40,22 @@ void MOV_CURSOR_PREVIOUS_WORD(Inputs inputs, Error error){
     update_view_end(1, buff);
 }
 
+void MOV_CURSOR_EOL(Inputs inputs, Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    move_buff_pos_eol(buff);
+    update_view_end(0, buff);
+}
+
+void CENTER_VIEW_AROUND_CURSOR_H(Inputs inputs, Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    center_around_cursor_h(buff);
+}
+
+void CENTER_VIEW_AROUND_CURSOR_V(Inputs inputs, Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    center_around_cursor_v(buff);
+}
+
 void EXIT(Inputs inputs,Error error){
     exit(0);
 }

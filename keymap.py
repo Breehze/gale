@@ -8,7 +8,10 @@ keymap = {
     "j" : "MOV_CURSOR_DOWN",
     "h" : "MOV_CURSOR_LEFT",
     "w" : "MOV_CURSOR_NEXT_WORD",
-    "bd" : "MOV_CURSOR_PREVIOUS_WORD",
+    "$" : "MOV_CURSOR_EOL",
+    "b" : "MOV_CURSOR_PREVIOUS_WORD",
+    "tt" : "CENTER_VIEW_AROUND_CURSOR_H",
+    "zz" : "CENTER_VIEW_AROUND_CURSOR_V",
     ":q\n" : "EXIT",
     "i" : "INSERT_MODE",
     ":w\n" : "SAVE_BUFFER"

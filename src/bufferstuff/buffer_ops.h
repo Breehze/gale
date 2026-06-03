@@ -12,6 +12,12 @@ void update_view_end(int direction,BufferCtx* buffer);
 
 void update_col_offset(BufferCtx* buffer);
 
+void center_around_cursor_v(BufferCtx *buff);
+
+void center_around_cursor_h(BufferCtx *buff);
+
+void move_buff_pos_eol(BufferCtx* buffer);
+
 void move_buff_pos_up(BufferCtx* buffer,int step);
 
 void move_buff_pos_down(BufferCtx* buffer,int step);
