@@ -66,6 +66,13 @@ void INSERT_MODE(Inputs inputs,Error error){
     *mode = INSERT;
 }
 
+void INSERT_MODE_APPEND(Inputs inputs,Error error){
+    BufferCtx * buff = ((WrappedInput*)inputs)->buff;
+    Mode * mode = ((WrappedInput*)inputs)->mode;
+    buff->buff_pos++;
+    *mode = INSERT;
+}
+
 void SAVE_BUFFER(Inputs inputs,Error error){
     BufferCtx * buff = ((WrappedInput*)inputs)->buff;
     TermCtx  term = ((WrappedInput *)inputs)->term;

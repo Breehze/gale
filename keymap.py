@@ -14,6 +14,7 @@ keymap = {
     "zz" : "CENTER_VIEW_AROUND_CURSOR_V",
     ":q\n" : "EXIT",
     "i" : "INSERT_MODE",
+    "a" : "INSERT_MODE_APPEND",
     ":w\n" : "SAVE_BUFFER"
 }
 

@@ -23,6 +23,7 @@ handler call0(char * switcheroo){
        case 'z': return call5fe43ad3(switcheroo);
        case ':': return call269d9c8e(switcheroo);
        case 'i': return &INSERT_MODE;
+       case 'a': return &INSERT_MODE_APPEND;
        default: return NULL;
    }
 }
